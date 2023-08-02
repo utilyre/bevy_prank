@@ -1,0 +1,13 @@
+[package]
+name = "bevy_prank"
+version = "0.1.0"
+authors = ["Amirabbas Fazelinia <utilyre@proton.me>"]
+edition = "2021"
+description = "Unreal Engine inspired debug camera for the Bevy game engine"
+repository = "https://github.com/utilyre/bevy_prank"
+license-file = "LICENSE"
+categories = ["game-development"]
+keywords = ["bevy", "plugin", "camera"]
+
+[dependencies.bevy]
+version = "^0.11"
