@@ -1,13 +1,11 @@
-use self::events::{
-    direction_input, mode_input, rotation_input, Prank3dDirection, Prank3dMode, Prank3dRotation,
-};
+use self::input::{Prank3dDirection, Prank3dInputPlugin, Prank3dMode, Prank3dRotation};
 use bevy::{
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
 use std::f32::consts;
 
-pub mod events;
+pub mod input;
 
 pub(super) struct Prank3dPlugin {
     pub(super) default_mode_input: bool,
@@ -17,20 +15,13 @@ pub(super) struct Prank3dPlugin {
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Prank3d>();
-        app.init_resource::<Prank3dMode>();
-        app.add_event::<Prank3dDirection>();
-        app.add_event::<Prank3dRotation>();
+        app.add_plugins(Prank3dInputPlugin {
+            default_mode_input: self.default_mode_input,
+            default_direction_input: self.default_direction_input,
+            default_rotaion_input: self.default_rotaion_input,
+        });
 
-        if self.default_mode_input {
-            app.add_systems(PreUpdate, mode_input);
-        }
-        if self.default_direction_input {
-            app.add_systems(PreUpdate, direction_input);
-        }
-        if self.default_rotaion_input {
-            app.add_systems(PreUpdate, rotation_input);
-        }
+        app.register_type::<Prank3d>();
 
         app.add_systems(Update, cursor);
         app.add_systems(Update, movement);

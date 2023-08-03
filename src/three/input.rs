@@ -1,6 +1,30 @@
 use super::Prank3d;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
+pub(super) struct Prank3dInputPlugin {
+    pub(super) default_mode_input: bool,
+    pub(super) default_direction_input: bool,
+    pub(super) default_rotaion_input: bool,
+}
+
+impl Plugin for Prank3dInputPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<Prank3dMode>();
+        app.add_event::<Prank3dDirection>();
+        app.add_event::<Prank3dRotation>();
+
+        if self.default_mode_input {
+            app.add_systems(PreUpdate, mode_input);
+        }
+        if self.default_direction_input {
+            app.add_systems(PreUpdate, direction_input);
+        }
+        if self.default_rotaion_input {
+            app.add_systems(PreUpdate, rotation_input);
+        }
+    }
+}
+
 #[derive(Default, Resource)]
 pub enum Prank3dMode {
     Fly,
@@ -14,7 +38,7 @@ pub struct Prank3dDirection(pub Vec3);
 #[derive(Event)]
 pub struct Prank3dRotation(pub Vec2);
 
-pub(super) fn mode_input(
+fn mode_input(
     pranks: Query<&Camera, With<Prank3d>>,
     mut mode: ResMut<Prank3dMode>,
     mouse: Res<Input<MouseButton>>,
@@ -31,7 +55,7 @@ pub(super) fn mode_input(
     }
 }
 
-pub(super) fn direction_input(
+fn direction_input(
     pranks: Query<(&GlobalTransform, &Camera), With<Prank3d>>,
     mut direction_event: EventWriter<Prank3dDirection>,
     keyboard: Res<Input<KeyCode>>,
@@ -69,7 +93,7 @@ pub(super) fn direction_input(
     direction_event.send(Prank3dDirection(direction));
 }
 
-pub(super) fn rotation_input(
+fn rotation_input(
     mut rotation_event: EventWriter<Prank3dRotation>,
     mut mouse_event: EventReader<MouseMotion>,
 ) {
