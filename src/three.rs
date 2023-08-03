@@ -1,7 +1,4 @@
-use self::events::{
-    direction_input, rotation_input, Prank3dAbsoluteDirection, Prank3dRelativeDirection,
-    Prank3dRotation,
-};
+use self::events::{direction_input, rotation_input, Prank3dDirection, Prank3dRotation};
 use bevy::{
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
@@ -19,8 +16,7 @@ pub(super) struct Prank3dPlugin {
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Prank3d>();
-        app.add_event::<Prank3dAbsoluteDirection>();
-        app.add_event::<Prank3dRelativeDirection>();
+        app.add_event::<Prank3dDirection>();
         app.add_event::<Prank3dRotation>();
 
         if self.default_mode_management {
@@ -108,8 +104,7 @@ fn mode_management(
 
 fn movement(
     mut pranks: Query<(&mut Transform, &Camera, &Prank3d), With<Prank3d>>,
-    mut adir: EventReader<Prank3dAbsoluteDirection>,
-    mut rdir: EventReader<Prank3dRelativeDirection>,
+    mut direction: EventReader<Prank3dDirection>,
     time: Res<Time>,
 ) {
     let Some((mut transform, _, prank)) = pranks
@@ -118,11 +113,9 @@ fn movement(
     else {
         return;
     };
-    let adir = adir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
-    let rdir = rdir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
+    let direction = direction.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
 
-    let rdir = transform.rotation * rdir;
-    transform.translation += prank.speed * (adir + rdir).normalize_or_zero() * time.delta_seconds();
+    transform.translation += prank.speed * direction.normalize_or_zero() * time.delta_seconds();
 }
 
 fn orientation(

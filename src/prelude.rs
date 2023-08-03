@@ -1,6 +1,6 @@
 pub use crate::{
     three::{
-        events::{Prank3dAbsoluteDirection, Prank3dRelativeDirection, Prank3dRotation},
+        events::{Prank3dDirection, Prank3dRotation},
         Prank3d,
     },
     PrankPlugin,
