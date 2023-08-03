@@ -86,22 +86,21 @@ fn mode_management(
     mut window: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut window = window.single_mut();
-    let Some((_, mut prank)) = pranks
-        .iter_mut()
-        .find(|(camera, _)| camera.is_active)
-    else {
-        return;
-    };
 
-    if mouse.just_pressed(MouseButton::Right) {
-        window.cursor.visible = false;
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        prank.mode = Prank3dMode::Fly;
-    }
-    if mouse.just_released(MouseButton::Right) {
-        window.cursor.visible = true;
-        window.cursor.grab_mode = CursorGrabMode::None;
-        prank.mode = Prank3dMode::None;
+    for (camera, mut prank) in pranks.iter_mut() {
+        if camera.is_active {
+            if mouse.just_pressed(MouseButton::Right) {
+                window.cursor.visible = false;
+                window.cursor.grab_mode = CursorGrabMode::Locked;
+                prank.mode = Prank3dMode::Fly;
+            }
+        }
+
+        if mouse.just_released(MouseButton::Right) {
+            window.cursor.visible = true;
+            window.cursor.grab_mode = CursorGrabMode::None;
+            prank.mode = Prank3dMode::None;
+        }
     }
 }
 
