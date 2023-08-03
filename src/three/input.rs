@@ -45,6 +45,7 @@ impl<'a> Sum<&'a Prank3dRotation> for Vec2 {
 
 fn mode_input(
     active: Res<Prank3dActive>,
+    prev_mode: Res<State<Prank3dMode>>,
     mut mode: ResMut<NextState<Prank3dMode>>,
     mouse: Res<Input<MouseButton>>,
 ) {
@@ -53,18 +54,24 @@ fn mode_input(
         return;
     }
 
-    if mouse.just_released(MouseButton::Right) {
-        mode.set(Prank3dMode::None);
-    }
-    if mouse.just_pressed(MouseButton::Right) {
-        mode.set(Prank3dMode::Fly);
-    }
-
-    if mouse.just_released(MouseButton::Middle) {
-        mode.set(Prank3dMode::None);
-    }
-    if mouse.just_pressed(MouseButton::Middle) {
-        mode.set(Prank3dMode::Offset);
+    match **prev_mode {
+        Prank3dMode::Fly => {
+            if mouse.just_released(MouseButton::Right) {
+                mode.set(Prank3dMode::None);
+            }
+        }
+        Prank3dMode::Offset => {
+            if mouse.just_released(MouseButton::Middle) {
+                mode.set(Prank3dMode::None);
+            }
+        }
+        Prank3dMode::None => {
+            if mouse.just_pressed(MouseButton::Right) {
+                mode.set(Prank3dMode::Fly);
+            } else if mouse.just_pressed(MouseButton::Middle) {
+                mode.set(Prank3dMode::Offset);
+            }
+        }
     }
 }
 
