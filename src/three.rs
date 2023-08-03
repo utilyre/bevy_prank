@@ -1,4 +1,4 @@
-use self::input::{Prank3dDirection, Prank3dInputPlugin, Prank3dMode, Prank3dRotation};
+use self::input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation};
 use bevy::{
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
@@ -75,18 +75,18 @@ fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<P
 }
 
 fn movement(
-    mut direction: EventReader<Prank3dDirection>,
+    mut movement: EventReader<Prank3dMovement>,
     active: Res<Prank3dActive>,
     mut pranks: Query<(&mut Transform, &Prank3d)>,
     time: Res<Time>,
 ) {
-    let direction: Vec3 = direction.iter().sum();
+    let movement: Vec3 = movement.iter().sum();
     let Some(entity) = active.0 else {
         return;
     };
     let (mut transform, prank) = pranks.get_mut(entity).expect("already checked");
 
-    transform.translation += prank.speed * direction * time.delta_seconds();
+    transform.translation += prank.speed * movement * time.delta_seconds();
 }
 
 fn orientation(

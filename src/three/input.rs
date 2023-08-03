@@ -7,12 +7,12 @@ pub(super) struct Prank3dInputPlugin;
 impl Plugin for Prank3dInputPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<Prank3dMode>();
-        app.add_event::<Prank3dDirection>();
+        app.add_event::<Prank3dMovement>();
         app.add_event::<Prank3dRotation>();
 
         app.add_systems(
             PreUpdate,
-            (mode_input, direction_input, rotation_input).after(active),
+            (mode_input, movement_input, rotation_input).after(active),
         );
     }
 }
@@ -26,11 +26,11 @@ pub(super) enum Prank3dMode {
 }
 
 #[derive(Event)]
-pub(super) struct Prank3dDirection(Vec3);
+pub(super) struct Prank3dMovement(Vec3);
 
-impl<'a> Sum<&'a Prank3dDirection> for Vec3 {
-    fn sum<I: Iterator<Item = &'a Prank3dDirection>>(iter: I) -> Self {
-        iter.fold(Vec3::ZERO, |acc, direction| acc + direction.0)
+impl<'a> Sum<&'a Prank3dMovement> for Vec3 {
+    fn sum<I: Iterator<Item = &'a Prank3dMovement>>(iter: I) -> Self {
+        iter.fold(Vec3::ZERO, |acc, x| acc + x.0)
     }
 }
 
@@ -39,7 +39,7 @@ pub(super) struct Prank3dRotation(Vec2);
 
 impl<'a> Sum<&'a Prank3dRotation> for Vec2 {
     fn sum<I: Iterator<Item = &'a Prank3dRotation>>(iter: I) -> Self {
-        iter.fold(Vec2::ZERO, |acc, direction| acc + direction.0)
+        iter.fold(Vec2::ZERO, |acc, x| acc + x.0)
     }
 }
 
@@ -75,11 +75,11 @@ fn mode_input(
     }
 }
 
-fn direction_input(
+fn movement_input(
     mode: Res<State<Prank3dMode>>,
     active: Res<Prank3dActive>,
     pranks: Query<(&GlobalTransform, &Prank3d), With<Prank3d>>,
-    mut direction: EventWriter<Prank3dDirection>,
+    mut movement: EventWriter<Prank3dMovement>,
     mut motion: EventReader<MouseMotion>,
     keyboard: Res<Input<KeyCode>>,
 ) {
@@ -88,33 +88,33 @@ fn direction_input(
     };
     let (transform, prank) = pranks.get(entity).expect("already checked");
 
-    direction.send(Prank3dDirection(match **mode {
+    movement.send(Prank3dMovement(match **mode {
         Prank3dMode::Fly => {
-            let mut direction = Vec3::ZERO;
+            let mut movement = Vec3::ZERO;
 
             if keyboard.pressed(KeyCode::W) {
-                direction += transform.forward();
+                movement += transform.forward();
             }
             if keyboard.pressed(KeyCode::A) {
-                direction += transform.left();
+                movement += transform.left();
             }
             if keyboard.pressed(KeyCode::S) {
-                direction += transform.back();
+                movement += transform.back();
             }
             if keyboard.pressed(KeyCode::D) {
-                direction += transform.right();
+                movement += transform.right();
             }
             if keyboard.pressed(KeyCode::ShiftLeft) {
-                direction = Vec3::new(direction.x, 0.0, direction.z);
+                movement = Vec3::new(movement.x, 0.0, movement.z);
             }
             if keyboard.pressed(KeyCode::E) {
-                direction += Vec3::Y;
+                movement += Vec3::Y;
             }
             if keyboard.pressed(KeyCode::Q) {
-                direction += Vec3::NEG_Y;
+                movement += Vec3::NEG_Y;
             }
 
-            direction.normalize_or_zero()
+            movement.normalize_or_zero()
         }
         Prank3dMode::Offset => {
             let motion = motion
@@ -138,9 +138,7 @@ fn rotation_input(
     mut motion: EventReader<MouseMotion>,
 ) {
     rotation.send(Prank3dRotation(match **mode {
-        Prank3dMode::Fly => motion
-            .iter()
-            .fold(Vec2::ZERO, |acc, motion| acc + motion.delta),
+        Prank3dMode::Fly => motion.iter().fold(Vec2::ZERO, |acc, x| acc + x.delta),
         Prank3dMode::Offset => Vec2::ZERO,
         Prank3dMode::None => Vec2::ZERO,
     }));
