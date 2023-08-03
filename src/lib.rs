@@ -71,11 +71,11 @@ impl Default for Prank3d {
 }
 
 fn movement(
-    mut cameras: Query<(&mut Transform, &Camera, &Prank3d), With<Prank3d>>,
+    mut pranks: Query<(&mut Transform, &Camera, &Prank3d), With<Prank3d>>,
     mut event: EventReader<PrankMovement>,
     time: Res<Time>,
 ) {
-    for (mut transform, camera, prank) in cameras.iter_mut() {
+    for (mut transform, camera, prank) in pranks.iter_mut() {
         if !camera.is_active {
             continue;
         }
