@@ -52,12 +52,15 @@ impl Default for Prank3d {
 }
 
 fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Prank3dActive>) {
-    *active = Prank3dActive(
-        pranks
-            .iter()
-            .find(|(_, camera)| camera.is_active)
-            .map(|(entity, _)| entity),
-    );
+    let new = pranks
+        .iter()
+        .find(|(_, camera)| camera.is_active)
+        .map(|(entity, _)| entity);
+    if new == active.0 {
+        return;
+    }
+
+    *active = Prank3dActive(new);
 }
 
 fn sync_cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<Prank3dMode>>) {
