@@ -23,8 +23,7 @@ impl Plugin for Prank3dPlugin {
     }
 }
 
-#[derive(Default, Reflect, Resource)]
-#[reflect(Resource)]
+#[derive(Default, Resource)]
 struct Prank3dActive(Option<Entity>);
 
 #[derive(Reflect, Component)]
