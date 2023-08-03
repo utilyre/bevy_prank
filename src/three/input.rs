@@ -35,7 +35,7 @@ pub(super) enum Prank3dMode {
 }
 
 #[derive(Resource)]
-struct Prank3dSpeedFactor(f32);
+pub(super) struct Prank3dSpeedFactor(pub(super) f32);
 
 impl Default for Prank3dSpeedFactor {
     fn default() -> Self {

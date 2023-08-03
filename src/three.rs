@@ -1,4 +1,6 @@
-use self::input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation};
+use self::input::{
+    Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation, Prank3dSpeedFactor,
+};
 use bevy::{
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
@@ -20,6 +22,12 @@ impl Plugin for Prank3dPlugin {
         app.add_systems(
             Update,
             (
+                spawn_speed_factor_text
+                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
+                despawn_speed_factor_text
+                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
+                sync_speed_factor_text
+                    .run_if(|speed_factor: Res<Prank3dSpeedFactor>| speed_factor.is_changed()),
                 sync_cursor.run_if(|mode: Res<State<Prank3dMode>>| mode.is_changed()),
                 movement.run_if(not(in_state(Prank3dMode::None))),
                 rotation.run_if(in_state(Prank3dMode::Fly)),
@@ -51,6 +59,9 @@ impl Default for Prank3d {
     }
 }
 
+#[derive(Component)]
+struct SpeedFactorText;
+
 fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Prank3dActive>) {
     let new = pranks
         .iter()
@@ -61,6 +72,57 @@ fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResM
     }
 
     *active = Prank3dActive(new);
+}
+
+fn spawn_speed_factor_text(
+    mut commands: Commands,
+    speed_factor_text: Query<(), With<SpeedFactorText>>,
+    speed_factor: Res<Prank3dSpeedFactor>,
+) {
+    if !speed_factor_text.is_empty() {
+        return;
+    }
+
+    commands.spawn((
+        Name::new("SpeedFactorText"),
+        SpeedFactorText,
+        TextBundle::from_section(
+            format!("{:.1}", speed_factor.0),
+            TextStyle {
+                font_size: 18.0,
+                color: Color::WHITE,
+                ..default()
+            },
+        )
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(8.0),
+            right: Val::Px(24.0),
+            ..default()
+        }),
+    ));
+}
+
+fn despawn_speed_factor_text(
+    mut commands: Commands,
+    speed_factor_text: Query<Entity, With<SpeedFactorText>>,
+) {
+    let Ok(entity) = speed_factor_text.get_single() else {
+        return;
+    };
+
+    commands.entity(entity).despawn_recursive();
+}
+
+fn sync_speed_factor_text(
+    mut speed_factor_text: Query<&mut Text, With<SpeedFactorText>>,
+    speed_factor: Res<Prank3dSpeedFactor>,
+) {
+    let Ok(mut text) = speed_factor_text.get_single_mut() else {
+        return;
+    };
+
+    text.sections[0].value = format!("{:.1}", speed_factor.0);
 }
 
 fn sync_cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<Prank3dMode>>) {
