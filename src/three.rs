@@ -43,24 +43,6 @@ pub enum Prank3dMode {
     None,
 }
 
-impl Prank3dMode {
-    pub fn is_fly(&self) -> bool {
-        if let Self::Fly = self {
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn is_none(&self) -> bool {
-        if let Self::None = self {
-            true
-        } else {
-            false
-        }
-    }
-}
-
 #[derive(Reflect, Component)]
 #[reflect(Component)]
 pub struct Prank3d {
@@ -128,7 +110,7 @@ fn movement(
 ) {
     let Some((mut transform, _, prank)) = pranks
         .iter_mut()
-        .find(|(_, camera, prank)| camera.is_active && prank.mode.is_fly())
+        .find(|(_, camera, prank)| camera.is_active && matches!(prank.mode, Prank3dMode::Fly))
     else {
         return;
     };
@@ -144,7 +126,7 @@ fn orientation(
 ) {
     let Some((mut transform, _, mut prank)) = pranks
         .iter_mut()
-        .find(|(_, camera, prank)| camera.is_active && prank.mode.is_fly())
+        .find(|(_, camera, prank)| camera.is_active && matches!(prank.mode, Prank3dMode::Fly))
     else {
         return;
     };
