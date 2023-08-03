@@ -13,10 +13,10 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 1.  Install the crate using `cargo`
 
     ```bash
-    cargo add --dev bevy_prank
+    cargo add bevy_prank
     ```
 
-2.  Add `PrankPlugin` only in dev mode
+2.  Add `PrankPlugin` to your app
 
     ```rust
     use bevy::prelude::*;
@@ -27,7 +27,6 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
         // ...
 
-        #[cfg(debug_assertions)]
         app.add_plugins(PrankPlugin);
 
         // ...
@@ -36,7 +35,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
     }
     ```
 
-## 🎮 Usage
+## 🎮 Controls
 
 | Control                                                                                                            | Action                                                                                     |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
