@@ -12,7 +12,10 @@ pub(super) fn direction_input(
     mut direction_event: EventWriter<Prank3dDirection>,
     keyboard: Res<Input<KeyCode>>,
 ) {
-    let Some((transform, _)) = pranks.iter().find(|(_, camera)| camera.is_active) else {
+    let Some((transform, _)) = pranks
+        .iter()
+        .find(|(_, camera)| camera.is_active)
+    else {
         return;
     };
     let mut direction = Vec3::ZERO;

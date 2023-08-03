@@ -86,7 +86,10 @@ fn mode_management(
     mut window: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut window = window.single_mut();
-    let Some((_, mut prank)) = pranks.iter_mut().find(|&(camera, _)| camera.is_active) else {
+    let Some((_, mut prank)) = pranks
+        .iter_mut()
+        .find(|&(camera, _)| camera.is_active)
+    else {
         return;
     };
 
