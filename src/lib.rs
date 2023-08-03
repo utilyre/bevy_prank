@@ -100,13 +100,14 @@ fn movement(
     time: Res<Time>,
 ) {
     let adir = adir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
+    let rdir = rdir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
 
     for (mut transform, camera, prank) in pranks.iter_mut() {
         if !camera.is_active {
             continue;
         }
 
-        let rdir = transform.rotation * rdir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
+        let rdir = transform.rotation * rdir;
         transform.translation +=
             prank.speed * (adir + rdir).normalize_or_zero() * time.delta_seconds();
     }
