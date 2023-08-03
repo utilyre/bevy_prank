@@ -72,26 +72,16 @@ impl Default for Prank3d {
 
 fn movement(
     mut pranks: Query<(&mut Transform, &Camera, &Prank3d), With<Prank3d>>,
-    mut event: EventReader<PrankMovement>,
+    mut movement: EventReader<PrankMovement>,
     time: Res<Time>,
 ) {
+    let movement = movement.into_iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
+
     for (mut transform, camera, prank) in pranks.iter_mut() {
         if !camera.is_active {
             continue;
         }
-        let RenderTarget::Window(window) = camera.target else {
-            continue;
-        };
-        let WindowRef::Primary = window else {
-            continue;
-        };
 
-        let mut direction = Vec3::ZERO;
-        for movement in event.iter() {
-            direction += movement.0;
-        }
-
-        transform.translation += prank.speed * direction * time.delta_seconds();
-        break;
+        transform.translation += prank.speed * movement * time.delta_seconds();
     }
 }
