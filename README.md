@@ -6,6 +6,8 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
 </div>
 
+[demo.webm](https://github.com/utilyre/bevy_prank/assets/91974155/fd971418-b369-49ff-b959-2985c92e5d62)
+
 ## 📦 Installation
 
 1.  Install the crate using `cargo`
