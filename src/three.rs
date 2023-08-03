@@ -20,7 +20,10 @@ impl Plugin for Prank3dPlugin {
         app.add_event::<Prank3dRotation>();
 
         if self.default_mode_management {
-            app.add_systems(PreUpdate, mode_management);
+            app.add_systems(
+                PreUpdate,
+                (mode_management, window_cursor.after(mode_management)),
+            );
         }
         if self.default_direction_input {
             app.add_systems(PreUpdate, direction_input);
@@ -80,26 +83,40 @@ impl Default for Prank3d {
     }
 }
 
-fn mode_management(
-    mut pranks: Query<(&Camera, &mut Prank3d)>,
-    mouse: Res<Input<MouseButton>>,
+fn mode_management(mut pranks: Query<(&Camera, &mut Prank3d)>, mouse: Res<Input<MouseButton>>) {
+    match pranks.iter_mut().find(|(camera, _)| camera.is_active) {
+        Some((_, mut prank)) => {
+            if mouse.just_pressed(MouseButton::Right) {
+                prank.mode = Prank3dMode::Fly;
+            }
+            if mouse.just_released(MouseButton::Right) {
+                prank.mode = Prank3dMode::None;
+            }
+        }
+        None => (),
+    }
+}
+
+fn window_cursor(
     mut window: Query<&mut Window, With<PrimaryWindow>>,
+    pranks: Query<(&Camera, &Prank3d)>,
 ) {
     let mut window = window.single_mut();
 
-    for (camera, mut prank) in pranks.iter_mut() {
-        if camera.is_active {
-            if mouse.just_pressed(MouseButton::Right) {
+    match pranks.iter().find(|(camera, _)| camera.is_active) {
+        Some((_, prank)) => match prank.mode {
+            Prank3dMode::Fly => {
                 window.cursor.visible = false;
                 window.cursor.grab_mode = CursorGrabMode::Locked;
-                prank.mode = Prank3dMode::Fly;
             }
-        }
-
-        if mouse.just_released(MouseButton::Right) {
+            Prank3dMode::None => {
+                window.cursor.visible = true;
+                window.cursor.grab_mode = CursorGrabMode::None;
+            }
+        },
+        None => {
             window.cursor.visible = true;
             window.cursor.grab_mode = CursorGrabMode::None;
-            prank.mode = Prank3dMode::None;
         }
     }
 }
