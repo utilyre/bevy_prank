@@ -44,6 +44,24 @@ pub enum Prank3dMode {
     None,
 }
 
+impl Prank3dMode {
+    pub fn is_fly(&self) -> bool {
+        if let Self::Fly = self {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn is_none(&self) -> bool {
+        if let Self::None = self {
+            true
+        } else {
+            false
+        }
+    }
+}
+
 #[derive(Reflect, Component)]
 #[reflect(Component)]
 pub struct Prank3d {
@@ -72,24 +90,19 @@ fn mode_management(
     mut window: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let mut window = window.single_mut();
+    let Some((_, mut prank)) = pranks.iter_mut().find(|&(camera, _)| camera.is_active) else {
+        return;
+    };
 
-    for (camera, mut prank) in pranks.iter_mut() {
-        if !camera.is_active {
-            continue;
-        }
-
-        if mouse.just_pressed(MouseButton::Right) {
-            window.cursor.visible = false;
-            window.cursor.grab_mode = CursorGrabMode::Locked;
-            prank.mode = Prank3dMode::Fly;
-        }
-        if mouse.just_released(MouseButton::Right) {
-            window.cursor.visible = true;
-            window.cursor.grab_mode = CursorGrabMode::None;
-            prank.mode = Prank3dMode::None;
-        }
-
-        break;
+    if mouse.just_pressed(MouseButton::Right) {
+        window.cursor.visible = false;
+        window.cursor.grab_mode = CursorGrabMode::Locked;
+        prank.mode = Prank3dMode::Fly;
+    }
+    if mouse.just_released(MouseButton::Right) {
+        window.cursor.visible = true;
+        window.cursor.grab_mode = CursorGrabMode::None;
+        prank.mode = Prank3dMode::None;
     }
 }
 
@@ -99,23 +112,17 @@ fn movement(
     mut rdir: EventReader<Prank3dRelativeDirection>,
     time: Res<Time>,
 ) {
+    let Some((mut transform, _, prank)) = pranks
+        .iter_mut()
+        .find(|(_, camera, prank)| camera.is_active && prank.mode.is_fly())
+    else {
+        return;
+    };
     let adir = adir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
     let rdir = rdir.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
 
-    for (mut transform, camera, prank) in pranks.iter_mut() {
-        if !camera.is_active {
-            continue;
-        }
-        let Prank3dMode::Fly = prank.mode else {
-            continue;
-        };
-
-        let rdir = transform.rotation * rdir;
-        transform.translation +=
-            prank.speed * (adir + rdir).normalize_or_zero() * time.delta_seconds();
-
-        break;
-    }
+    let rdir = transform.rotation * rdir;
+    transform.translation += prank.speed * (adir + rdir).normalize_or_zero() * time.delta_seconds();
 }
 
 fn orientation(
@@ -123,22 +130,17 @@ fn orientation(
     mut rotation: EventReader<Prank3dRotation>,
     time: Res<Time>,
 ) {
+    let Some((mut transform, _, mut prank)) = pranks
+        .iter_mut()
+        .find(|(_, camera, prank)| camera.is_active && prank.mode.is_fly())
+    else {
+        return;
+    };
     let rotation = rotation.iter().fold(Vec2::ZERO, |acc, x| acc + x.0);
 
-    for (mut transform, camera, mut prank) in pranks.iter_mut() {
-        if !camera.is_active {
-            continue;
-        }
-        let Prank3dMode::Fly = prank.mode else {
-            continue;
-        };
+    prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
+        .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);
+    prank.yaw -= prank.sensitivity.x * rotation.x * time.delta_seconds();
 
-        prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
-            .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);
-        prank.yaw -= prank.sensitivity.x * rotation.x * time.delta_seconds();
-
-        transform.rotation = Quat::from_euler(EulerRot::YXZ, prank.yaw, prank.pitch, 0.0);
-
-        break;
-    }
+    transform.rotation = Quat::from_euler(EulerRot::YXZ, prank.yaw, prank.pitch, 0.0);
 }
