@@ -21,13 +21,19 @@ impl Plugin for Prank3dPlugin {
             default_rotaion_input: self.default_rotaion_input,
         });
 
+        app.init_resource::<Prank3dActive>();
         app.register_type::<Prank3d>();
 
+        app.add_systems(PreUpdate, active);
         app.add_systems(Update, cursor);
         app.add_systems(Update, movement);
         app.add_systems(Update, orientation);
     }
 }
+
+#[derive(Default, Reflect, Resource)]
+#[reflect(Resource)]
+pub struct Prank3dActive(pub Option<Entity>);
 
 #[derive(Reflect, Component)]
 #[reflect(Component)]
@@ -49,6 +55,15 @@ impl Default for Prank3d {
     }
 }
 
+fn active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Prank3dActive>) {
+    *active = Prank3dActive(
+        pranks
+            .iter()
+            .find(|(_, camera)| camera.is_active)
+            .map(|(entity, _)| entity),
+    );
+}
+
 fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<Prank3dMode>) {
     let mut window = window.single_mut();
 
@@ -65,43 +80,31 @@ fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<Prank3d
 }
 
 fn movement(
-    mode: Res<Prank3dMode>,
     mut direction: EventReader<Prank3dDirection>,
+    active: Res<Prank3dActive>,
     mut pranks: Query<(&mut Transform, &Camera, &Prank3d)>,
     time: Res<Time>,
 ) {
-    if !matches!(*mode, Prank3dMode::Fly) {
-        return;
-    }
-
-    let direction = direction.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
-    let Some((mut transform, _, prank)) = pranks
-        .iter_mut()
-        .find(|(_, camera, _)| camera.is_active)
-    else {
+    let direction: Vec3 = direction.iter().sum();
+    let Some(entity) = active.0 else {
         return;
     };
+    let (mut transform, _, prank) = pranks.get_mut(entity).expect("already checked");
 
     transform.translation += prank.speed * direction.normalize_or_zero() * time.delta_seconds();
 }
 
 fn orientation(
-    mode: Res<Prank3dMode>,
     mut rotation: EventReader<Prank3dRotation>,
+    active: Res<Prank3dActive>,
     mut pranks: Query<(&mut Transform, &Camera, &mut Prank3d)>,
     time: Res<Time>,
 ) {
-    if !matches!(*mode, Prank3dMode::Fly) {
-        return;
-    }
-
-    let rotation = rotation.iter().fold(Vec2::ZERO, |acc, x| acc + x.0);
-    let Some((mut transform, _, mut prank)) = pranks
-        .iter_mut()
-        .find(|(_, camera, _)| camera.is_active)
-    else {
+    let rotation: Vec2 = rotation.iter().sum();
+    let Some(entity) = active.0 else {
         return;
     };
+    let (mut transform, _, mut prank) = pranks.get_mut(entity).expect("already checked");
 
     prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
         .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);
