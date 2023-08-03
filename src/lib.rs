@@ -5,7 +5,7 @@ pub mod prelude;
 pub mod three;
 
 pub struct PrankPlugin {
-    pub default_mode_management: bool,
+    pub default_mode_input: bool,
     pub default_direction_input: bool,
     pub default_rotation_input: bool,
 }
@@ -13,7 +13,7 @@ pub struct PrankPlugin {
 impl Default for PrankPlugin {
     fn default() -> Self {
         Self {
-            default_mode_management: true,
+            default_mode_input: true,
             default_direction_input: true,
             default_rotation_input: true,
         }
@@ -23,7 +23,7 @@ impl Default for PrankPlugin {
 impl Plugin for PrankPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Prank3dPlugin {
-            default_mode_management: self.default_mode_management,
+            default_mode_input: self.default_mode_input,
             default_direction_input: self.default_direction_input,
             default_rotaion_input: self.default_rotation_input,
         });

@@ -1,11 +1,35 @@
 use super::Prank3d;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
+#[derive(Default, Resource)]
+pub enum Prank3dMode {
+    Fly,
+    #[default]
+    None,
+}
+
 #[derive(Event)]
 pub struct Prank3dDirection(pub Vec3);
 
 #[derive(Event)]
 pub struct Prank3dRotation(pub Vec2);
+
+pub(super) fn mode_input(
+    pranks: Query<&Camera, With<Prank3d>>,
+    mut mode: ResMut<Prank3dMode>,
+    mouse: Res<Input<MouseButton>>,
+) {
+    if !pranks.iter().any(|camera| camera.is_active) {
+        *mode = Prank3dMode::None;
+    }
+
+    if mouse.just_released(MouseButton::Right) {
+        *mode = Prank3dMode::None;
+    }
+    if mouse.just_pressed(MouseButton::Right) {
+        *mode = Prank3dMode::Fly;
+    }
+}
 
 pub(super) fn direction_input(
     pranks: Query<(&GlobalTransform, &Camera), With<Prank3d>>,
