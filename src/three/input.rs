@@ -3,7 +3,6 @@ use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
 };
-use std::iter::Sum;
 
 pub(super) struct Prank3dInputPlugin;
 
@@ -45,22 +44,10 @@ impl Default for Prank3dSpeedFactor {
 }
 
 #[derive(Event)]
-pub(super) struct Prank3dMovement(Vec3);
-
-impl<'a> Sum<&'a Prank3dMovement> for Vec3 {
-    fn sum<I: Iterator<Item = &'a Prank3dMovement>>(iter: I) -> Self {
-        iter.fold(Vec3::ZERO, |acc, x| acc + x.0)
-    }
-}
+pub(super) struct Prank3dMovement(pub(super) Vec3);
 
 #[derive(Event)]
-pub(super) struct Prank3dRotation(Vec2);
-
-impl<'a> Sum<&'a Prank3dRotation> for Vec2 {
-    fn sum<I: Iterator<Item = &'a Prank3dRotation>>(iter: I) -> Self {
-        iter.fold(Vec2::ZERO, |acc, x| acc + x.0)
-    }
-}
+pub(super) struct Prank3dRotation(pub(super) Vec2);
 
 fn mode_input(
     active: Res<Prank3dActive>,

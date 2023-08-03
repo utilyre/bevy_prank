@@ -85,7 +85,7 @@ fn movement(
     mut pranks: Query<(&mut Transform, &Prank3d)>,
     time: Res<Time>,
 ) {
-    let movement: Vec3 = movement.iter().sum();
+    let movement = movement.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
     let Some(entity) = active.0 else {
         return;
     };
@@ -100,7 +100,7 @@ fn rotation(
     mut pranks: Query<(&mut Transform, &mut Prank3d)>,
     time: Res<Time>,
 ) {
-    let rotation: Vec2 = rotation.iter().sum();
+    let rotation = rotation.iter().fold(Vec2::ZERO, |acc, x| acc + x.0);
     let Some(entity) = active.0 else {
         return;
     };
