@@ -47,9 +47,8 @@ fn setup(
     ));
 
     commands.spawn((
-        Name::new("Prank3d-00"),
+        Name::new("Camera3d"),
         CameraIndex(0),
-        Prank3d::default(),
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 2.0, 0.0),
             ..default()
@@ -83,6 +82,20 @@ fn setup(
             ..default()
         },
     ));
+
+    commands.spawn((
+        Name::new("Prank3d-03"),
+        CameraIndex(3),
+        Prank3d::default(),
+        Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 2.0, 0.0),
+            camera: Camera {
+                is_active: false,
+                ..default()
+            },
+            ..default()
+        },
+    ));
 }
 
 fn camera_switch(
@@ -94,7 +107,7 @@ fn camera_switch(
         return;
     }
 
-    index.0 = (index.0 + 1) % 3;
+    index.0 = (index.0 + 1) % 4;
     for (mut camera, idx) in cameras.iter_mut() {
         camera.is_active = idx.0 == index.0;
     }
