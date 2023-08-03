@@ -10,7 +10,7 @@ pub(super) struct Prank3dInputPlugin {
 
 impl Plugin for Prank3dInputPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Prank3dMode>();
+        app.add_state::<Prank3dMode>();
         app.add_event::<Prank3dDirection>();
         app.add_event::<Prank3dRotation>();
 
@@ -26,8 +26,7 @@ impl Plugin for Prank3dInputPlugin {
     }
 }
 
-#[derive(Default, Reflect, Resource)]
-#[reflect(Resource)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, States)]
 pub enum Prank3dMode {
     Fly,
     Offset,
@@ -55,31 +54,31 @@ impl<'a> Sum<&'a Prank3dRotation> for Vec2 {
 
 fn mode_input(
     active: Res<Prank3dActive>,
-    mut mode: ResMut<Prank3dMode>,
+    mut mode: ResMut<NextState<Prank3dMode>>,
     mouse: Res<Input<MouseButton>>,
 ) {
     if active.0.is_none() {
-        *mode = Prank3dMode::None;
+        mode.set(Prank3dMode::None);
         return;
     }
 
     if mouse.just_released(MouseButton::Right) {
-        *mode = Prank3dMode::None;
+        mode.set(Prank3dMode::None);
     }
     if mouse.just_pressed(MouseButton::Right) {
-        *mode = Prank3dMode::Fly;
+        mode.set(Prank3dMode::Fly);
     }
 
     if mouse.just_released(MouseButton::Middle) {
-        *mode = Prank3dMode::None;
+        mode.set(Prank3dMode::None);
     }
     if mouse.just_pressed(MouseButton::Middle) {
-        *mode = Prank3dMode::Offset;
+        mode.set(Prank3dMode::Offset);
     }
 }
 
 fn direction_input(
-    mode: Res<Prank3dMode>,
+    mode: Res<State<Prank3dMode>>,
     active: Res<Prank3dActive>,
     pranks: Query<(&GlobalTransform, &Prank3d), With<Prank3d>>,
     mut direction: EventWriter<Prank3dDirection>,
@@ -91,7 +90,7 @@ fn direction_input(
     };
     let (transform, prank) = pranks.get(entity).expect("already checked");
 
-    direction.send(Prank3dDirection(match *mode {
+    direction.send(Prank3dDirection(match **mode {
         Prank3dMode::Fly => {
             let mut direction = Vec3::ZERO;
 
@@ -136,11 +135,11 @@ fn direction_input(
 }
 
 fn rotation_input(
-    mode: Res<Prank3dMode>,
+    mode: Res<State<Prank3dMode>>,
     mut rotation: EventWriter<Prank3dRotation>,
     mut motion: EventReader<MouseMotion>,
 ) {
-    rotation.send(Prank3dRotation(match *mode {
+    rotation.send(Prank3dRotation(match **mode {
         Prank3dMode::Fly => motion
             .iter()
             .fold(Vec2::ZERO, |acc, motion| acc + motion.delta),

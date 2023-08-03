@@ -64,10 +64,10 @@ fn active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Pr
     );
 }
 
-fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<Prank3dMode>) {
+fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<Prank3dMode>>) {
     let mut window = window.single_mut();
 
-    match *mode {
+    match **mode {
         Prank3dMode::Fly => {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
