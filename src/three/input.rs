@@ -1,4 +1,4 @@
-use super::{active, Prank3d, Prank3dActive};
+use super::{sync_active, Prank3d, Prank3dActive};
 use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
@@ -19,10 +19,10 @@ impl Plugin for Prank3dInputPlugin {
             (
                 mode_input,
                 speed_factor_input.run_if(in_state(Prank3dMode::Fly)),
-                movement_input,
-                rotation_input,
+                movement_input.run_if(not(in_state(Prank3dMode::None))),
+                rotation_input.run_if(in_state(Prank3dMode::Fly)),
             )
-                .after(active),
+                .after(sync_active),
         );
     }
 }

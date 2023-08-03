@@ -16,10 +16,15 @@ impl Plugin for Prank3dPlugin {
         app.init_resource::<Prank3dActive>();
         app.register_type::<Prank3d>();
 
-        app.add_systems(PreUpdate, active);
-        app.add_systems(Update, cursor);
-        app.add_systems(Update, movement);
-        app.add_systems(Update, orientation);
+        app.add_systems(PreUpdate, sync_active);
+        app.add_systems(
+            Update,
+            (
+                sync_cursor.run_if(|mode: Res<State<Prank3dMode>>| mode.is_changed()),
+                movement.run_if(not(in_state(Prank3dMode::None))),
+                rotation.run_if(in_state(Prank3dMode::Fly)),
+            ),
+        );
     }
 }
 
@@ -46,7 +51,7 @@ impl Default for Prank3d {
     }
 }
 
-fn active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Prank3dActive>) {
+fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Prank3dActive>) {
     *active = Prank3dActive(
         pranks
             .iter()
@@ -55,7 +60,7 @@ fn active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Pr
     );
 }
 
-fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<Prank3dMode>>) {
+fn sync_cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<Prank3dMode>>) {
     let mut window = window.single_mut();
 
     match **mode {
@@ -89,7 +94,7 @@ fn movement(
     transform.translation += prank.speed * movement * time.delta_seconds();
 }
 
-fn orientation(
+fn rotation(
     mut rotation: EventReader<Prank3dRotation>,
     active: Res<Prank3dActive>,
     mut pranks: Query<(&mut Transform, &mut Prank3d)>,
