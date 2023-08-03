@@ -1,0 +1,101 @@
+use bevy::prelude::*;
+use bevy_prank::prelude::*;
+
+fn main() {
+    App::new()
+        .add_plugins((DefaultPlugins, PrankPlugin::default()))
+        .insert_resource(CurrentCamera(0))
+        .add_systems(Startup, setup)
+        .add_systems(Update, camera_switch)
+        .run();
+}
+
+#[derive(Resource)]
+struct CurrentCamera(usize);
+
+#[derive(Component)]
+struct CameraIndex(usize);
+
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.insert_resource(AmbientLight {
+        brightness: 0.1,
+        ..default()
+    });
+
+    commands.spawn((
+        Name::new("Ground"),
+        PbrBundle {
+            transform: Transform::from_xyz(0.0, -0.5, 0.0),
+            mesh: meshes.add(shape::Box::new(50.0, 1.0, 50.0).into()),
+            material: materials.add(Color::DARK_GREEN.into()),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Name::new("Cube"),
+        PbrBundle {
+            transform: Transform::from_xyz(0.0, 0.5, -8.0),
+            mesh: meshes.add(shape::Cube::new(1.0).into()),
+            material: materials.add(Color::WHITE.into()),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Name::new("Prank3d-00"),
+        CameraIndex(0),
+        Prank3d::default(),
+        Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 2.0, 0.0),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Name::new("Prank3d-01"),
+        CameraIndex(1),
+        Prank3d::default(),
+        Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 2.0, 0.0),
+            camera: Camera {
+                is_active: false,
+                ..default()
+            },
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Name::new("Prank3d-02"),
+        CameraIndex(2),
+        Prank3d::default(),
+        Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 2.0, 0.0),
+            camera: Camera {
+                is_active: false,
+                ..default()
+            },
+            ..default()
+        },
+    ));
+}
+
+fn camera_switch(
+    mut cameras: Query<(&mut Camera, &CameraIndex)>,
+    mut index: ResMut<CurrentCamera>,
+    keyboard: Res<Input<KeyCode>>,
+) {
+    if !keyboard.just_pressed(KeyCode::Space) {
+        return;
+    }
+
+    index.0 = (index.0 + 1) % 3;
+    for (mut camera, idx) in cameras.iter_mut() {
+        camera.is_active = idx.0 == index.0;
+    }
+}
