@@ -39,7 +39,7 @@ fn setup(
     ));
 
     commands.spawn((
-        Name::new("UCamera3d"),
+        Name::new("Prank3d"),
         Prank3d::default(),
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 2.0, 0.0),

@@ -1,1 +1,1 @@
-pub use crate::{Prank3d, Prank3dDirection, PrankPlugin};
+pub use crate::{Prank3d, Prank3dAbsoluteDirection, Prank3dRelativeDirection, PrankPlugin};
