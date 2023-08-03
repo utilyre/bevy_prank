@@ -1,5 +1,8 @@
 use super::{active, Prank3d, Prank3dActive};
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::{
+    input::mouse::{MouseMotion, MouseWheel},
+    prelude::*,
+};
 use std::iter::Sum;
 
 pub(super) struct Prank3dInputPlugin;
@@ -7,12 +10,19 @@ pub(super) struct Prank3dInputPlugin;
 impl Plugin for Prank3dInputPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<Prank3dMode>();
+        app.init_resource::<Prank3dSpeedFactor>();
         app.add_event::<Prank3dMovement>();
         app.add_event::<Prank3dRotation>();
 
         app.add_systems(
             PreUpdate,
-            (mode_input, movement_input, rotation_input).after(active),
+            (
+                mode_input,
+                speed_factor_input.run_if(in_state(Prank3dMode::Fly)),
+                movement_input,
+                rotation_input,
+            )
+                .after(active),
         );
     }
 }
@@ -23,6 +33,15 @@ pub(super) enum Prank3dMode {
     Offset,
     #[default]
     None,
+}
+
+#[derive(Resource)]
+struct Prank3dSpeedFactor(f32);
+
+impl Default for Prank3dSpeedFactor {
+    fn default() -> Self {
+        Self(1.0)
+    }
 }
 
 #[derive(Event)]
@@ -75,10 +94,19 @@ fn mode_input(
     }
 }
 
+fn speed_factor_input(
+    mut speed_factor: ResMut<Prank3dSpeedFactor>,
+    mut wheel: EventReader<MouseWheel>,
+) {
+    speed_factor.0 =
+        (speed_factor.0 + 0.1 * wheel.iter().fold(0.0, |acc, x| acc + x.y)).clamp(0.1, 10.0);
+}
+
 fn movement_input(
     mode: Res<State<Prank3dMode>>,
     active: Res<Prank3dActive>,
     pranks: Query<(&GlobalTransform, &Prank3d), With<Prank3d>>,
+    speed_factor: Res<Prank3dSpeedFactor>,
     mut movement: EventWriter<Prank3dMovement>,
     mut motion: EventReader<MouseMotion>,
     keyboard: Res<Input<KeyCode>>,
@@ -114,7 +142,7 @@ fn movement_input(
                 movement += Vec3::NEG_Y;
             }
 
-            movement.normalize_or_zero()
+            speed_factor.0 * movement.normalize_or_zero()
         }
         Prank3dMode::Offset => {
             let motion = motion
