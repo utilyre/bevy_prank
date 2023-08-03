@@ -5,21 +5,13 @@ use bevy::{
 };
 use std::f32::consts;
 
-pub mod input;
+mod input;
 
-pub(super) struct Prank3dPlugin {
-    pub(super) default_mode_input: bool,
-    pub(super) default_direction_input: bool,
-    pub(super) default_rotaion_input: bool,
-}
+pub(super) struct Prank3dPlugin;
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Prank3dInputPlugin {
-            default_mode_input: self.default_mode_input,
-            default_direction_input: self.default_direction_input,
-            default_rotaion_input: self.default_rotaion_input,
-        });
+        app.add_plugins(Prank3dInputPlugin);
 
         app.init_resource::<Prank3dActive>();
         app.register_type::<Prank3d>();
@@ -33,7 +25,7 @@ impl Plugin for Prank3dPlugin {
 
 #[derive(Default, Reflect, Resource)]
 #[reflect(Resource)]
-pub struct Prank3dActive(pub Option<Entity>);
+struct Prank3dActive(Option<Entity>);
 
 #[derive(Reflect, Component)]
 #[reflect(Component)]

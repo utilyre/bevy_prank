@@ -1,7 +1,1 @@
-pub use crate::{
-    three::{
-        input::{Prank3dDirection, Prank3dMode, Prank3dRotation},
-        Prank3d,
-    },
-    PrankPlugin,
-};
+pub use crate::{three::Prank3d, PrankPlugin};

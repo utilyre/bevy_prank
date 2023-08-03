@@ -3,7 +3,7 @@ use bevy_prank::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, PrankPlugin::default()))
+        .add_plugins((DefaultPlugins, PrankPlugin))
         .add_systems(Startup, setup)
         .run();
 }

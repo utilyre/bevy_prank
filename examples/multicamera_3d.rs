@@ -3,7 +3,7 @@ use bevy_prank::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, PrankPlugin::default()))
+        .add_plugins((DefaultPlugins, PrankPlugin))
         .insert_resource(CurrentCamera(0))
         .add_systems(Startup, setup)
         .add_systems(Update, camera_switch)

@@ -1,12 +1,8 @@
-use super::{Prank3d, Prank3dActive};
+use super::{active, Prank3d, Prank3dActive};
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use std::iter::Sum;
 
-pub(super) struct Prank3dInputPlugin {
-    pub(super) default_mode_input: bool,
-    pub(super) default_direction_input: bool,
-    pub(super) default_rotaion_input: bool,
-}
+pub(super) struct Prank3dInputPlugin;
 
 impl Plugin for Prank3dInputPlugin {
     fn build(&self, app: &mut App) {
@@ -14,20 +10,15 @@ impl Plugin for Prank3dInputPlugin {
         app.add_event::<Prank3dDirection>();
         app.add_event::<Prank3dRotation>();
 
-        if self.default_mode_input {
-            app.add_systems(PreUpdate, mode_input);
-        }
-        if self.default_direction_input {
-            app.add_systems(PreUpdate, direction_input);
-        }
-        if self.default_rotaion_input {
-            app.add_systems(PreUpdate, rotation_input);
-        }
+        app.add_systems(
+            PreUpdate,
+            (mode_input, direction_input, rotation_input).after(active),
+        );
     }
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, States)]
-pub enum Prank3dMode {
+pub(super) enum Prank3dMode {
     Fly,
     Offset,
     #[default]
@@ -35,7 +26,7 @@ pub enum Prank3dMode {
 }
 
 #[derive(Event)]
-pub struct Prank3dDirection(pub Vec3);
+pub(super) struct Prank3dDirection(Vec3);
 
 impl<'a> Sum<&'a Prank3dDirection> for Vec3 {
     fn sum<I: Iterator<Item = &'a Prank3dDirection>>(iter: I) -> Self {
@@ -44,7 +35,7 @@ impl<'a> Sum<&'a Prank3dDirection> for Vec3 {
 }
 
 #[derive(Event)]
-pub struct Prank3dRotation(pub Vec2);
+pub(super) struct Prank3dRotation(Vec2);
 
 impl<'a> Sum<&'a Prank3dRotation> for Vec2 {
     fn sum<I: Iterator<Item = &'a Prank3dRotation>>(iter: I) -> Self {
