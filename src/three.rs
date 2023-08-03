@@ -88,7 +88,7 @@ fn mode_management(
     let mut window = window.single_mut();
     let Some((_, mut prank)) = pranks
         .iter_mut()
-        .find(|&(camera, _)| camera.is_active)
+        .find(|(camera, _)| camera.is_active)
     else {
         return;
     };
