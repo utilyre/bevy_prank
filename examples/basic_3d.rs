@@ -1,11 +1,18 @@
+//! This demonstrates a very basic setup of the plugin.
+
 use bevy::prelude::*;
 use bevy_prank::prelude::*;
 
 fn main() {
-    App::new()
-        .add_plugins((DefaultPlugins, PrankPlugin))
-        .add_systems(Startup, setup)
-        .run();
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins);
+    #[cfg(debug_assertions)]
+    app.add_plugins(PrankPlugin);
+
+    app.add_systems(Startup, setup);
+
+    app.run();
 }
 
 fn setup(

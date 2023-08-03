@@ -1,13 +1,20 @@
+//! This demonstrates how to have multiple prank cameras simultaneously.
+
 use bevy::prelude::*;
 use bevy_prank::prelude::*;
 
 fn main() {
-    App::new()
-        .add_plugins((DefaultPlugins, PrankPlugin))
-        .insert_resource(CurrentCamera(0))
-        .add_systems(Startup, setup)
-        .add_systems(Update, camera_switch)
-        .run();
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins);
+    #[cfg(debug_assertions)]
+    app.add_plugins(PrankPlugin);
+
+    app.insert_resource(CurrentCamera(0));
+    app.add_systems(Startup, setup);
+    app.add_systems(Update, camera_switch);
+
+    app.run();
 }
 
 #[derive(Resource)]
