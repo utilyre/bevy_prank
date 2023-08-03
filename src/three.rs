@@ -72,6 +72,10 @@ fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<Prank3d
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
         }
+        Prank3dMode::Offset => {
+            window.cursor.visible = false;
+            window.cursor.grab_mode = CursorGrabMode::Locked;
+        }
         Prank3dMode::None => {
             window.cursor.visible = true;
             window.cursor.grab_mode = CursorGrabMode::None;
@@ -82,29 +86,29 @@ fn cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<Prank3d
 fn movement(
     mut direction: EventReader<Prank3dDirection>,
     active: Res<Prank3dActive>,
-    mut pranks: Query<(&mut Transform, &Camera, &Prank3d)>,
+    mut pranks: Query<(&mut Transform, &Prank3d)>,
     time: Res<Time>,
 ) {
     let direction: Vec3 = direction.iter().sum();
     let Some(entity) = active.0 else {
         return;
     };
-    let (mut transform, _, prank) = pranks.get_mut(entity).expect("already checked");
+    let (mut transform, prank) = pranks.get_mut(entity).expect("already checked");
 
-    transform.translation += prank.speed * direction.normalize_or_zero() * time.delta_seconds();
+    transform.translation += prank.speed * direction * time.delta_seconds();
 }
 
 fn orientation(
     mut rotation: EventReader<Prank3dRotation>,
     active: Res<Prank3dActive>,
-    mut pranks: Query<(&mut Transform, &Camera, &mut Prank3d)>,
+    mut pranks: Query<(&mut Transform, &mut Prank3d)>,
     time: Res<Time>,
 ) {
     let rotation: Vec2 = rotation.iter().sum();
     let Some(entity) = active.0 else {
         return;
     };
-    let (mut transform, _, mut prank) = pranks.get_mut(entity).expect("already checked");
+    let (mut transform, mut prank) = pranks.get_mut(entity).expect("already checked");
 
     prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
         .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);

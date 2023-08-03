@@ -30,6 +30,7 @@ impl Plugin for Prank3dInputPlugin {
 #[reflect(Resource)]
 pub enum Prank3dMode {
     Fly,
+    Offset,
     #[default]
     None,
 }
@@ -68,19 +69,27 @@ fn mode_input(
     if mouse.just_pressed(MouseButton::Right) {
         *mode = Prank3dMode::Fly;
     }
+
+    if mouse.just_released(MouseButton::Middle) {
+        *mode = Prank3dMode::None;
+    }
+    if mouse.just_pressed(MouseButton::Middle) {
+        *mode = Prank3dMode::Offset;
+    }
 }
 
 fn direction_input(
     mode: Res<Prank3dMode>,
     active: Res<Prank3dActive>,
-    pranks: Query<(&GlobalTransform, &Camera), With<Prank3d>>,
+    pranks: Query<(&GlobalTransform, &Prank3d), With<Prank3d>>,
     mut direction: EventWriter<Prank3dDirection>,
+    mut motion: EventReader<MouseMotion>,
     keyboard: Res<Input<KeyCode>>,
 ) {
     let Some(entity) = active.0 else {
         return;
     };
-    let (transform, _) = pranks.get(entity).expect("already checked");
+    let (transform, prank) = pranks.get(entity).expect("already checked");
 
     direction.send(Prank3dDirection(match *mode {
         Prank3dMode::Fly => {
@@ -108,7 +117,19 @@ fn direction_input(
                 direction += Vec3::NEG_Y;
             }
 
-            direction
+            direction.normalize_or_zero()
+        }
+        Prank3dMode::Offset => {
+            let motion = motion
+                .iter()
+                .fold(Vec2::ZERO, |acc, motion| acc + motion.delta);
+
+            transform.compute_transform().rotation
+                * Vec3::new(
+                    prank.sensitivity.x * motion.x,
+                    -prank.sensitivity.y * motion.y,
+                    0.0,
+                )
         }
         Prank3dMode::None => Vec3::ZERO,
     }));
@@ -117,12 +138,13 @@ fn direction_input(
 fn rotation_input(
     mode: Res<Prank3dMode>,
     mut rotation: EventWriter<Prank3dRotation>,
-    mut mouse: EventReader<MouseMotion>,
+    mut motion: EventReader<MouseMotion>,
 ) {
     rotation.send(Prank3dRotation(match *mode {
-        Prank3dMode::Fly => mouse
+        Prank3dMode::Fly => motion
             .iter()
             .fold(Vec2::ZERO, |acc, motion| acc + motion.delta),
+        Prank3dMode::Offset => Vec2::ZERO,
         Prank3dMode::None => Vec2::ZERO,
     }));
 }
