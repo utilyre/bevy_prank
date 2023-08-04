@@ -19,7 +19,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 2.  Add `PrankPlugin` to your app
 
     ```rust
-    use bevy::prelude::*;
+    use bevy::{prelude::*, diagnostic::FrameTimeDiagnosticsPlugin};
     use bevy_prank::prelude::*;
 
     fn main() {
@@ -27,6 +27,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
         // ...
 
+        app.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin));
         app.add_plugins(PrankPlugin);
 
         // ...
