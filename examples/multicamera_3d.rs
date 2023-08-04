@@ -1,13 +1,13 @@
 //! Demonstrates how to have multiple prank cameras simultaneously.
 
-use bevy::prelude::*;
+use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_prank::prelude::*;
 
 fn main() {
     let mut app = App::new();
 
-    app.add_plugins(DefaultPlugins);
-    app.add_plugins(PrankPlugin);
+    app.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin));
+    app.add_plugins(PrankPlugin::default());
 
     app.add_systems(Startup, setup);
     app.add_systems(Update, camera_switch);
