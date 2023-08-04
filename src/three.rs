@@ -2,6 +2,7 @@ use self::{
     hud::Prank3dHudPlugin,
     input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation},
 };
+use crate::Prank3dHudConfig;
 use bevy::{
     prelude::*,
     window::{Cursor, CursorGrabMode, PrimaryWindow},
@@ -11,12 +12,18 @@ use std::f32::consts;
 mod hud;
 mod input;
 
-pub(super) struct Prank3dPlugin;
+pub(super) struct Prank3dPlugin {
+    pub(super) hud: Option<Prank3dHudConfig>,
+}
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Prank3dInputPlugin);
-        app.add_plugins(Prank3dHudPlugin);
+
+        if let Some(config) = self.hud.clone() {
+            app.insert_resource(config);
+            app.add_plugins(Prank3dHudPlugin);
+        }
 
         app.init_resource::<Prank3dActive>();
         app.register_type::<Prank3d>();

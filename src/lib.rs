@@ -18,12 +18,9 @@ impl Default for PrankPlugin {
 
 impl Plugin for PrankPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(match self.hud {
-            Some(ref config) => config.clone(),
-            None => Prank3dHudConfig::default(),
+        app.add_plugins(Prank3dPlugin {
+            hud: self.hud.clone(),
         });
-
-        app.add_plugins(Prank3dPlugin);
     }
 }
 
