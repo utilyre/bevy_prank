@@ -1,4 +1,4 @@
-//! This demonstrates a very basic setup of the plugin.
+//! Demonstrates a very basic setup of the plugin.
 
 use bevy::prelude::*;
 use bevy_prank::prelude::*;
