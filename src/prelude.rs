@@ -1,1 +1,1 @@
-pub use crate::{three::Prank3d, PrankPlugin};
+pub use crate::{three::Prank3d, Prank3dHudConfig, PrankPlugin};

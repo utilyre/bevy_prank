@@ -1,4 +1,5 @@
 use super::{Prank3d, Prank3dActive};
+use crate::Prank3dHudConfig;
 use bevy::{
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     prelude::*,
@@ -35,7 +36,7 @@ struct HudFps;
 #[derive(Component)]
 struct HudSpeedFactor;
 
-fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>) {
+fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dHudConfig>) {
     if !hud.is_empty() {
         return;
     }
@@ -45,7 +46,7 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>) {
             Name::new("Hud"),
             Hud,
             NodeBundle {
-                background_color: Color::BLACK.with_a(0.9).into(),
+                background_color: config.background_color,
                 style: Style {
                     position_type: PositionType::Absolute,
                     bottom: Val::Px(0.0),
@@ -63,40 +64,19 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>) {
             parent.spawn((
                 Name::new("HudTranslation"),
                 HudTranslation,
-                TextBundle::from_section(
-                    "",
-                    TextStyle {
-                        font_size: 14.0,
-                        color: Color::WHITE,
-                        ..default()
-                    },
-                ),
+                TextBundle::from_section("", config.text_style.clone()),
             ));
 
             parent.spawn((
                 Name::new("HudFps"),
                 HudFps,
-                TextBundle::from_section(
-                    "",
-                    TextStyle {
-                        font_size: 14.0,
-                        color: Color::WHITE,
-                        ..default()
-                    },
-                ),
+                TextBundle::from_section("", config.text_style.clone()),
             ));
 
             parent.spawn((
                 Name::new("HudSpeedFactor"),
                 HudSpeedFactor,
-                TextBundle::from_section(
-                    "",
-                    TextStyle {
-                        font_size: 14.0,
-                        color: Color::WHITE,
-                        ..default()
-                    },
-                ),
+                TextBundle::from_section("", config.text_style.clone()),
             ));
         });
 }
