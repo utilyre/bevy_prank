@@ -22,6 +22,7 @@ impl Plugin for Prank3dPlugin {
         app.add_systems(
             Update,
             (
+                initialize_orientation,
                 spawn_speed_factor_text
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
                 despawn_speed_factor_text
@@ -76,6 +77,18 @@ fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResM
     }
 
     *active = Prank3dActive(new);
+}
+
+fn initialize_orientation(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
+    for (mut prank, transform) in pranks.iter_mut() {
+        let (yaw, pitch, _) = transform
+            .compute_transform()
+            .rotation
+            .to_euler(EulerRot::YXZ);
+
+        prank.pitch = pitch;
+        prank.yaw = yaw;
+    }
 }
 
 fn spawn_speed_factor_text(
