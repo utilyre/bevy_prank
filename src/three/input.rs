@@ -52,19 +52,19 @@ fn mode_input(
 
     match **prev_mode {
         Prank3dMode::Fly => {
-            if mouse.just_released(MouseButton::Right) {
+            if !mouse.pressed(MouseButton::Right) {
                 mode.set(Prank3dMode::None);
             }
         }
         Prank3dMode::Offset => {
-            if mouse.just_released(MouseButton::Middle) {
+            if !mouse.pressed(MouseButton::Middle) {
                 mode.set(Prank3dMode::None);
             }
         }
         Prank3dMode::None => {
-            if mouse.just_pressed(MouseButton::Right) {
+            if mouse.pressed(MouseButton::Right) {
                 mode.set(Prank3dMode::Fly);
-            } else if mouse.just_pressed(MouseButton::Middle) {
+            } else if mouse.pressed(MouseButton::Middle) {
                 mode.set(Prank3dMode::Offset);
             }
         }
