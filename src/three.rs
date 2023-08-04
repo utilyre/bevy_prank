@@ -138,7 +138,7 @@ fn despawn_speed_factor_text(
 fn sync_speed_factor_text(
     mut speed_factor_text: Query<&mut Text, With<SpeedFactorText>>,
     active: Res<Prank3dActive>,
-    pranks: Query<&Prank3d>,
+    pranks: Query<&Prank3d, Changed<Prank3d>>,
 ) {
     let Ok(mut text) = speed_factor_text.get_single_mut() else {
         return;
@@ -146,7 +146,9 @@ fn sync_speed_factor_text(
     let Some(entity) = active.0 else {
         return;
     };
-    let prank = pranks.get(entity).expect("already checked");
+    let Ok(prank) = pranks.get(entity) else {
+        return;
+    };
 
     text.sections[0].value = format!("{:.1}", prank.speed_factor);
 }
