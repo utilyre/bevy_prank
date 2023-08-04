@@ -9,7 +9,6 @@ pub(super) struct Prank3dInputPlugin;
 impl Plugin for Prank3dInputPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<Prank3dMode>();
-        app.init_resource::<Prank3dSpeedFactor>();
         app.add_event::<Prank3dMovement>();
         app.add_event::<Prank3dRotation>();
 
@@ -32,15 +31,6 @@ pub(super) enum Prank3dMode {
     Offset,
     #[default]
     None,
-}
-
-#[derive(Resource)]
-pub(super) struct Prank3dSpeedFactor(pub(super) f32);
-
-impl Default for Prank3dSpeedFactor {
-    fn default() -> Self {
-        Self(1.0)
-    }
 }
 
 #[derive(Event)]
@@ -82,18 +72,23 @@ fn mode_input(
 }
 
 fn speed_factor_input(
-    mut speed_factor: ResMut<Prank3dSpeedFactor>,
+    active: Res<Prank3dActive>,
+    mut pranks: Query<&mut Prank3d>,
     mut wheel: EventReader<MouseWheel>,
 ) {
-    speed_factor.0 =
-        (speed_factor.0 + 0.1 * wheel.iter().fold(0.0, |acc, x| acc + x.y)).clamp(0.1, 10.0);
+    let Some(entity) = active.0 else {
+        return;
+    };
+    let mut prank = pranks.get_mut(entity).expect("already checked");
+
+    prank.speed_factor =
+        (prank.speed_factor + 0.1 * wheel.iter().fold(0.0, |acc, x| acc + x.y)).clamp(0.1, 10.0);
 }
 
 fn movement_input(
     mode: Res<State<Prank3dMode>>,
     active: Res<Prank3dActive>,
-    pranks: Query<(&GlobalTransform, &Prank3d), With<Prank3d>>,
-    speed_factor: Res<Prank3dSpeedFactor>,
+    pranks: Query<(&GlobalTransform, &Prank3d)>,
     mut movement: EventWriter<Prank3dMovement>,
     mut motion: EventReader<MouseMotion>,
     keyboard: Res<Input<KeyCode>>,
@@ -129,7 +124,7 @@ fn movement_input(
                 movement += Vec3::NEG_Y;
             }
 
-            speed_factor.0 * movement.normalize_or_zero()
+            prank.speed_factor * movement.normalize_or_zero()
         }
         Prank3dMode::Offset => {
             let motion = motion

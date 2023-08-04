@@ -1,6 +1,4 @@
-use self::input::{
-    Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation, Prank3dSpeedFactor,
-};
+use self::input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation};
 use bevy::{
     prelude::*,
     window::{Cursor, CursorGrabMode, PrimaryWindow},
@@ -27,8 +25,7 @@ impl Plugin for Prank3dPlugin {
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
                 despawn_speed_factor_text
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
-                sync_speed_factor_text
-                    .run_if(|speed_factor: Res<Prank3dSpeedFactor>| speed_factor.is_changed()),
+                sync_speed_factor_text,
                 sync_cursor.run_if(
                     |active: Res<Prank3dActive>, mode: Res<State<Prank3dMode>>| {
                         active.is_changed() || mode.is_changed()
@@ -48,6 +45,7 @@ struct Prank3dActive(Option<Entity>);
 #[reflect(Component)]
 pub struct Prank3d {
     pub speed: f32,
+    pub speed_factor: f32,
     pub sensitivity: Vec2,
     pub pitch: f32,
     pub yaw: f32,
@@ -57,6 +55,7 @@ impl Default for Prank3d {
     fn default() -> Self {
         Self {
             speed: 10.0,
+            speed_factor: 1.0,
             sensitivity: Vec2::splat(0.08),
             pitch: 0.0,
             yaw: 0.0,
@@ -94,17 +93,22 @@ fn initialize_orientation(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Ad
 fn spawn_speed_factor_text(
     mut commands: Commands,
     speed_factor_text: Query<(), With<SpeedFactorText>>,
-    speed_factor: Res<Prank3dSpeedFactor>,
+    active: Res<Prank3dActive>,
+    pranks: Query<&Prank3d>,
 ) {
     if !speed_factor_text.is_empty() {
         return;
     }
+    let Some(entity) = active.0 else {
+        return;
+    };
+    let prank = pranks.get(entity).expect("already checked");
 
     commands.spawn((
         Name::new("SpeedFactorText"),
         SpeedFactorText,
         TextBundle::from_section(
-            format!("{:.1}", speed_factor.0),
+            format!("{:.1}", prank.speed_factor),
             TextStyle {
                 font_size: 18.0,
                 color: Color::WHITE,
@@ -133,13 +137,18 @@ fn despawn_speed_factor_text(
 
 fn sync_speed_factor_text(
     mut speed_factor_text: Query<&mut Text, With<SpeedFactorText>>,
-    speed_factor: Res<Prank3dSpeedFactor>,
+    active: Res<Prank3dActive>,
+    pranks: Query<&Prank3d>,
 ) {
     let Ok(mut text) = speed_factor_text.get_single_mut() else {
         return;
     };
+    let Some(entity) = active.0 else {
+        return;
+    };
+    let prank = pranks.get(entity).expect("already checked");
 
-    text.sections[0].value = format!("{:.1}", speed_factor.0);
+    text.sections[0].value = format!("{:.1}", prank.speed_factor);
 }
 
 fn sync_cursor(
