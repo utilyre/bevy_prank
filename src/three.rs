@@ -3,7 +3,7 @@ use self::input::{
 };
 use bevy::{
     prelude::*,
-    window::{CursorGrabMode, PrimaryWindow},
+    window::{Cursor, CursorGrabMode, PrimaryWindow},
 };
 use std::f32::consts;
 
@@ -28,7 +28,11 @@ impl Plugin for Prank3dPlugin {
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
                 sync_speed_factor_text
                     .run_if(|speed_factor: Res<Prank3dSpeedFactor>| speed_factor.is_changed()),
-                sync_cursor.run_if(|mode: Res<State<Prank3dMode>>| mode.is_changed()),
+                sync_cursor.run_if(
+                    |active: Res<Prank3dActive>, mode: Res<State<Prank3dMode>>| {
+                        active.is_changed() || mode.is_changed()
+                    },
+                ),
                 movement.run_if(not(in_state(Prank3dMode::None))),
                 rotation.run_if(in_state(Prank3dMode::Fly)),
             ),
@@ -125,8 +129,24 @@ fn sync_speed_factor_text(
     text.sections[0].value = format!("{:.1}", speed_factor.0);
 }
 
-fn sync_cursor(mut window: Query<&mut Window, With<PrimaryWindow>>, mode: Res<State<Prank3dMode>>) {
+fn sync_cursor(
+    mut window: Query<&mut Window, With<PrimaryWindow>>,
+    active: Res<Prank3dActive>,
+    mode: Res<State<Prank3dMode>>,
+    mut initialized: Local<bool>,
+    mut cursor: Local<Cursor>,
+) {
     let mut window = window.single_mut();
+
+    if !*initialized {
+        *initialized = true;
+        *cursor = window.cursor;
+    }
+    if active.0.is_none() {
+        *initialized = false;
+        window.cursor = *cursor;
+        return;
+    }
 
     match **mode {
         Prank3dMode::Fly => {
