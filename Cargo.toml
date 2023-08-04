@@ -1,6 +1,6 @@
 [package]
 name = "bevy_prank"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Amirabbas Fazelinia <utilyre@proton.me>"]
 edition = "2021"
 description = "Opinionated Unreal Engine inspired spectator camera for the Bevy game engine"
