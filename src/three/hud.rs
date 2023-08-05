@@ -19,7 +19,7 @@ impl Plugin for Prank3dHudPlugin {
                 sync_position,
                 sync_fps,
                 sync_fov,
-                sync_speed_factor,
+                sync_speed,
             ),
         );
     }
@@ -38,7 +38,7 @@ struct HudFps;
 struct HudFov;
 
 #[derive(Component)]
-struct HudSpeedFactor;
+struct HudSpeed;
 
 fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dHudConfig>) {
     if !hud.is_empty() {
@@ -84,8 +84,8 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dH
             ));
 
             parent.spawn((
-                Name::new("HudSpeedFactor"),
-                HudSpeedFactor,
+                Name::new("HudSpeed"),
+                HudSpeed,
                 TextBundle::from_section("", config.text_style.clone()),
             ));
         });
@@ -153,12 +153,12 @@ fn sync_fov(
     };
 }
 
-fn sync_speed_factor(
+fn sync_speed(
+    mut hud_speed: Query<&mut Text, With<HudSpeed>>,
     active: Res<Prank3dActive>,
     pranks: Query<&Prank3d>,
-    mut hud_speed_factor: Query<&mut Text, With<HudSpeedFactor>>,
 ) {
-    let Ok(mut text) = hud_speed_factor.get_single_mut() else {
+    let Ok(mut text) = hud_speed.get_single_mut() else {
         return;
     };
     let Some(entity) = active.0 else {
