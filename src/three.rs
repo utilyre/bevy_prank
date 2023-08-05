@@ -18,26 +18,23 @@ pub(super) struct Prank3dPlugin;
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Prank3dInputPlugin);
-        app.add_plugins(Prank3dHudPlugin);
-
-        app.init_resource::<Prank3dActive>();
-        app.register_type::<Prank3d>();
-
-        app.add_systems(PreUpdate, sync_active);
-        app.add_systems(
-            Update,
-            (
-                initialize,
-                sync_cursor.run_if(
-                    |active: Res<Prank3dActive>, mode: Res<State<Prank3dMode>>| {
-                        active.is_changed() || mode.is_changed()
-                    },
+        app.add_plugins((Prank3dInputPlugin, Prank3dHudPlugin))
+            .init_resource::<Prank3dActive>()
+            .register_type::<Prank3d>()
+            .add_systems(PreUpdate, sync_active)
+            .add_systems(
+                Update,
+                (
+                    initialize,
+                    sync_cursor.run_if(
+                        |active: Res<Prank3dActive>, mode: Res<State<Prank3dMode>>| {
+                            active.is_changed() || mode.is_changed()
+                        },
+                    ),
+                    movement,
+                    rotation.run_if(in_state(Prank3dMode::Fly)),
                 ),
-                movement,
-                rotation.run_if(in_state(Prank3dMode::Fly)),
-            ),
-        );
+            );
     }
 }
 

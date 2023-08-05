@@ -8,20 +8,19 @@ pub(super) struct Prank3dInputPlugin;
 
 impl Plugin for Prank3dInputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<Prank3dMode>();
-        app.add_event::<Prank3dMovement>();
-        app.add_event::<Prank3dRotation>();
-
-        app.add_systems(
-            PreUpdate,
-            (
-                mode,
-                speed_factor.run_if(in_state(Prank3dMode::Fly)),
-                movement.run_if(not(in_state(Prank3dMode::None))),
-                rotation.run_if(in_state(Prank3dMode::Fly)),
-            )
-                .after(sync_active),
-        );
+        app.add_state::<Prank3dMode>()
+            .add_event::<Prank3dMovement>()
+            .add_event::<Prank3dRotation>()
+            .add_systems(
+                PreUpdate,
+                (
+                    mode,
+                    speed_factor.run_if(in_state(Prank3dMode::Fly)),
+                    movement.run_if(not(in_state(Prank3dMode::None))),
+                    rotation.run_if(in_state(Prank3dMode::Fly)),
+                )
+                    .after(sync_active),
+            );
     }
 }
 

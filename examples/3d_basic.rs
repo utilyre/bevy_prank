@@ -4,14 +4,14 @@ use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_prank::prelude::*;
 
 fn main() {
-    let mut app = App::new();
-
-    app.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin));
-    app.add_plugins(PrankPlugin::default());
-
-    app.add_systems(Startup, setup);
-
-    app.run();
+    App::new()
+        .add_plugins((
+            DefaultPlugins,
+            FrameTimeDiagnosticsPlugin,
+            PrankPlugin::default(),
+        ))
+        .add_systems(Startup, setup)
+        .run();
 }
 
 fn setup(

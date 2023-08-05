@@ -18,21 +18,21 @@ pub mod three;
 /// # use bevy::{prelude::*, diagnostic::FrameTimeDiagnosticsPlugin};
 /// # use bevy_prank::prelude::*;
 /// #
-/// let mut app = App::new();
-///
-/// app.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin));
-/// app.add_plugins(PrankPlugin::default());
-///
-/// app.run();
+/// App::new()
+///     .add_plugins((
+///         DefaultPlugins,
+///         FrameTimeDiagnosticsPlugin,
+///         PrankPlugin::default(),
+///     ))
+///     .run();
 /// ```
 #[derive(Default)]
 pub struct PrankPlugin(pub PrankConfig);
 
 impl Plugin for PrankPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(self.0.clone());
-
-        app.add_plugins(Prank3dPlugin);
+        app.add_plugins(Prank3dPlugin)
+            .insert_resource(self.0.clone());
     }
 }
 
@@ -44,15 +44,15 @@ impl Plugin for PrankPlugin {
 /// # use bevy::prelude::*;
 /// # use bevy_prank::prelude::*;
 /// #
-/// let mut app = App::new();
-///
-/// app.add_plugins(DefaultPlugins);
-/// app.add_plugins(PrankPlugin(PrankConfig {
-///     hud: None,
-///     ..default()
-/// }));
-///
-/// app.run();
+/// App::new()
+///     .add_plugins((
+///         DefaultPlugins,
+///         PrankPlugin(PrankConfig {
+///             hud: None,
+///            ..default()
+///         }),
+///     ))
+///     .run();
 /// ```
 #[derive(Clone, Resource)]
 pub struct PrankConfig {

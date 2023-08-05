@@ -33,20 +33,15 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
     use bevy_prank::prelude::*;
 
     fn main() {
-        let mut app = App::new();
-
-        // ...
-
-        app.add_plugins((
-            DefaultPlugins,
-            // required unless `hud` field of `PrankConfig` is set to `None`
-            FrameTimeDiagnosticsPlugin,
-        ));
-        app.add_plugins(PrankPlugin::default());
-
-        // ...
-
-        app.run();
+        App::new()
+            // ...
+            .add_plugins((
+                DefaultPlugins,
+                FrameTimeDiagnosticsPlugin, // required unless `hud` field of `PrankConfig` is set to `None`
+                PrankPlugin::default(),
+            ))
+            // ...
+            .run();
     }
     ```
 
