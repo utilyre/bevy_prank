@@ -15,15 +15,11 @@ pub mod three;
 /// Add [`PrankPlugin`] to your app.
 ///
 /// ```
-/// # use bevy::{prelude::*, diagnostic::FrameTimeDiagnosticsPlugin};
+/// # use bevy::prelude::*;
 /// # use bevy_prank::prelude::*;
 /// #
 /// App::new()
-///     .add_plugins((
-///         DefaultPlugins,
-///         FrameTimeDiagnosticsPlugin,
-///         PrankPlugin::default(),
-///     ))
+///     .add_plugins((DefaultPlugins, PrankPlugin::default()))
 ///     .run();
 /// ```
 #[derive(Default)]

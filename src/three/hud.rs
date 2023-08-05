@@ -2,10 +2,7 @@
 
 use super::{Prank3d, Prank3dActive};
 use crate::PrankConfig;
-use bevy::{
-    diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
-    prelude::*,
-};
+use bevy::prelude::*;
 
 pub(super) struct Prank3dHudPlugin;
 
@@ -150,18 +147,12 @@ fn sync_position(
     text.sections[0].value = format!("Position: [{:.2}, {:.2}, {:.2}]", x, y, z);
 }
 
-fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, diagnostics: Res<DiagnosticsStore>) {
+fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, time: Res<Time>) {
     let Ok(mut text) = hud_fps.get_single_mut() else {
         return;
     };
-    let Some(diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) else {
-        panic!("`bevy::diagnostic::FrameTimeDiagnosticsPlugin` not added to the app");
-    };
-    let Some(fps) = diagnostic.smoothed() else {
-        return;
-    };
 
-    text.sections[0].value = format!("FPS: {:.0}", fps);
+    text.sections[0].value = format!("FPS: {:.0}", time.delta_seconds().recip());
 }
 
 fn sync_fov(

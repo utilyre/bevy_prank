@@ -1,18 +1,11 @@
 //! Demonstrates having a separate window to spectate the world in real-time.
 
-use bevy::{
-    diagnostic::FrameTimeDiagnosticsPlugin, prelude::*, render::camera::RenderTarget,
-    window::WindowRef,
-};
+use bevy::{prelude::*, render::camera::RenderTarget, window::WindowRef};
 use bevy_prank::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((
-            DefaultPlugins,
-            FrameTimeDiagnosticsPlugin,
-            PrankPlugin::default(),
-        ))
+        .add_plugins((DefaultPlugins, PrankPlugin::default()))
         .add_systems(Startup, setup)
         .run();
 }

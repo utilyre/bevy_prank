@@ -1,15 +1,11 @@
 //! Demonstrates a very basic setup of the plugin.
 
-use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
+use bevy::prelude::*;
 use bevy_prank::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((
-            DefaultPlugins,
-            FrameTimeDiagnosticsPlugin,
-            PrankPlugin::default(),
-        ))
+        .add_plugins((DefaultPlugins, PrankPlugin::default()))
         .add_systems(Startup, setup)
         .run();
 }
