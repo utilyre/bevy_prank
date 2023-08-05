@@ -228,7 +228,7 @@ fn movement(
     let Some(entity) = active.0 else {
         return;
     };
-    let (mut transform, mut prank) = pranks.get_mut(entity).expect("already checked");
+    let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
 
     let s = prank.speed;
     prank.position += s * movement * time.delta_seconds();
@@ -249,7 +249,7 @@ fn rotation(
     let Some(entity) = active.0 else {
         return;
     };
-    let (mut transform, mut prank) = pranks.get_mut(entity).expect("already checked");
+    let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
 
     prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
         .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);

@@ -78,7 +78,7 @@ fn speed_factor(
     let Some(entity) = active.0 else {
         return;
     };
-    let mut prank = pranks.get_mut(entity).expect("already checked");
+    let mut prank = pranks.get_mut(entity).expect("exists");
 
     prank.speed_factor =
         (prank.speed_factor + 0.1 * wheel.iter().fold(0.0, |acc, x| acc + x.y)).clamp(0.1, 10.0);
@@ -95,7 +95,7 @@ fn movement(
     let Some(entity) = active.0 else {
         return;
     };
-    let (transform, prank) = pranks.get(entity).expect("already checked");
+    let (transform, prank) = pranks.get(entity).expect("exists");
 
     movement.send(Prank3dMovement(match **mode {
         Prank3dMode::Fly => {
