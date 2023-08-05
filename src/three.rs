@@ -6,7 +6,8 @@ use self::{
 };
 use bevy::{
     prelude::*,
-    window::{Cursor, CursorGrabMode, PrimaryWindow},
+    render::camera::NormalizedRenderTarget,
+    window::{CursorGrabMode, PrimaryWindow},
 };
 use std::f32::consts;
 
@@ -112,16 +113,47 @@ impl Default for Prank3d {
     }
 }
 
-fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResMut<Prank3dActive>) {
-    let new = pranks
-        .iter()
-        .find(|(_, camera)| camera.is_active)
-        .map(|(entity, _)| entity);
-    if new == active.0 {
-        return;
-    }
+fn get_focused_window<'a>(
+    primary_window: Option<(Entity, &'_ Window)>,
+    mut windows: impl Iterator<Item = (Entity, &'a Window)>,
+) -> Option<Entity> {
+    windows
+        .find(|(_, window)| window.focused)
+        .map(|(entity, _)| entity)
+        .or_else(|| primary_window.and_then(|(entity, window)| window.focused.then_some(entity)))
+}
 
-    *active = Prank3dActive(new);
+fn sync_active(
+    primary_window: Query<(Entity, &Window), With<PrimaryWindow>>,
+    windows: Query<(Entity, &Window), Without<PrimaryWindow>>,
+    pranks: Query<(Entity, &Camera), With<Prank3d>>,
+    mut active: ResMut<Prank3dActive>,
+) {
+    let primary_window = primary_window.get_single().ok();
+    let Some(focused_window) = get_focused_window(primary_window, windows.iter()) else {
+        return;
+    };
+
+    let active_entity = pranks
+        .iter()
+        .find(|(_, camera)| {
+            if !camera.is_active {
+                return false;
+            }
+            let Some(NormalizedRenderTarget::Window(winref)) = camera
+                .target
+                .normalize(primary_window.map(|(entity, _)| entity))
+            else {
+                return false;
+            };
+
+            winref.entity() == focused_window
+        })
+        .map(|(entity, _)| entity);
+
+    if active_entity != active.0 {
+        *active = Prank3dActive(active_entity);
+    }
 }
 
 fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
@@ -144,23 +176,25 @@ fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>
 }
 
 fn sync_cursor(
-    mut window: Query<&mut Window, With<PrimaryWindow>>,
+    primary_window: Query<Entity, With<PrimaryWindow>>,
+    mut windows: Query<&mut Window, Without<PrimaryWindow>>,
     active: Res<Prank3dActive>,
+    pranks: Query<&Camera, With<Prank3d>>,
     mode: Res<State<Prank3dMode>>,
-    mut initialized: Local<bool>,
-    mut cursor: Local<Cursor>,
 ) {
-    let mut window = window.single_mut();
-
-    if !*initialized {
-        *initialized = true;
-        *cursor = window.cursor;
-    }
-    if active.0.is_none() {
-        *initialized = false;
-        window.cursor = *cursor;
+    let primary_window = primary_window.get_single();
+    let Some(entity) = active.0 else {
         return;
-    }
+    };
+    let camera = pranks.get(entity).expect("exists");
+
+    let Some(NormalizedRenderTarget::Window(winref)) = camera
+        .target
+        .normalize(primary_window.ok())
+    else {
+        return;
+    };
+    let mut window = windows.get_mut(winref.entity()).expect("exists");
 
     match **mode {
         Prank3dMode::Fly => {
