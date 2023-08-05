@@ -1,3 +1,5 @@
+//! Provides three-dimensional camera functionality.
+
 use self::{
     hud::Prank3dHudPlugin,
     input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation},
@@ -41,16 +43,53 @@ impl Plugin for Prank3dPlugin {
 #[derive(Default, Resource)]
 struct Prank3dActive(Option<Entity>);
 
+/// Adds debug functionality to [`Camera3dBundle`].
+///
+/// # Example
+///
+/// ```
+/// # use bevy::prelude::*;
+/// # use bevy_prank::prelude::*;
+/// #
+/// fn setup(mut commands: Commands) {
+///     commands.spawn((
+///         Prank3d::default(),
+///         Camera3dBundle::default(),
+///     ));
+/// }
+/// #
+/// # bevy::ecs::system::assert_is_system(setup);
+/// ```
 #[derive(Reflect, Component)]
 #[reflect(Component)]
 pub struct Prank3d {
+    /// Constant speed that the camera moves at.
     pub speed: f32,
+
+    /// Factor of `speed` to adjust during gameplay with mouse scroll wheel.
     pub speed_factor: f32,
+
+    /// The rate that the camera approaches its position.
+    ///
+    /// Values closer to zero make the approaching faster.
+    ///
+    /// # Panic
+    ///
+    /// If its not in range `[0.0, 1.0)`.
     pub interp_rate: f32,
+
+    /// Sensitivity of mouse motion.
     pub sensitivity: Vec2,
 
+    /// The current position that the camera approaches towards.
+    ///
+    /// This should be used instead of [`Transform`]'s `translation` field.
     pub position: Vec3,
+
+    /// The current pitch of the camera in radians.
     pub pitch: f32,
+
+    /// The current yaw of the camera in radians.
     pub yaw: f32,
 }
 
@@ -61,7 +100,6 @@ impl Default for Prank3d {
             speed_factor: 1.0,
             interp_rate: 0.01,
             sensitivity: Vec2::splat(0.08),
-
             position: Vec3::ZERO,
             pitch: 0.0,
             yaw: 0.0,

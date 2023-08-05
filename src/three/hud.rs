@@ -1,3 +1,5 @@
+//! Camera HUD overlay.
+
 use super::{Prank3d, Prank3dActive};
 use crate::PrankConfig;
 use bevy::{
@@ -5,10 +7,16 @@ use bevy::{
     prelude::*,
 };
 
+/// Camera HUD overlay configuration.
 #[derive(Clone)]
 pub struct Prank3dHudConfig {
+    /// Overlay height.
     pub height: Val,
+
+    /// Overlay background color.
     pub background_color: BackgroundColor,
+
+    /// Overlay text style.
     pub text_style: TextStyle,
 }
 
