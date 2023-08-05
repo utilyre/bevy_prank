@@ -8,6 +8,13 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
 [demo.webm](https://github.com/utilyre/bevy_prank/assets/91974155/fd971418-b369-49ff-b959-2985c92e5d62)
 
+## ✨ Features
+
+- Provides smooth interpolation for movement without sacrificing camera position.
+- Includes an optional HUD overlay to display important information like FOV and FPS.
+- Automatically grabs cursor when <kbd>MMB</kbd>/<kbd>RMB</kbd> is held.
+- Allows complete control over movement via <kbd>LShift</kbd> prefixed controls.
+
 ## 📦 Installation
 
 1.  Install the crate using `cargo`
@@ -44,7 +51,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
 | Control                                                                                                            | Action                                                                                     |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| <kbd>MMD</kbd> + Drag                                                                                              | Offsets the camera on its local `x` (left/right) and `y` (top/bottom) axes                 |
+| <kbd>MMB</kbd> + Drag                                                                                              | Offsets the camera on its local `x` (left/right) and `y` (top/bottom) axes                 |
 | <kbd>RMB</kbd> + Drag                                                                                              | Rotates the camera                                                                         |
 | <kbd>RMB</kbd> + Scroll                                                                                            | Adjusts movement speed                                                                     |
 | <kbd>RMB</kbd> + <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                                               | Moves the camera on its local `x` (left/right) and `z` (front/back) axes                   |
