@@ -11,8 +11,11 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 ## ✨ Features
 
 - Provides smooth interpolation for movement without sacrificing camera position.
+
 - Includes an optional HUD overlay to display important information like FOV and FPS.
+
 - Automatically grabs cursor when <kbd>MMB</kbd>/<kbd>RMB</kbd> is held.
+
 - Allows complete control over movement via <kbd>LShift</kbd> prefixed controls.
 
 ## 📦 Installation
