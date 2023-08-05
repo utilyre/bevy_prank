@@ -46,6 +46,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
 | <kbd>MMD</kbd> + Drag                                                                                              | Offsets the camera on its local `x` (left/right) and `y` (top/bottom) axes                 |
 | <kbd>RMB</kbd> + Drag                                                                                              | Rotates the camera                                                                         |
+| <kbd>RMB</kbd> + Scroll                                                                                            | Adjusts movement speed                                                                     |
 | <kbd>RMB</kbd> + <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                                               | Moves the camera on its local `x` (left/right) and `z` (front/back) axes                   |
 | <kbd>RMB</kbd> + <kbd>E</kbd> <kbd>Q</kbd>                                                                         | Moves the camera on the `y` (top/bottom) axis                                              |
 | <kbd>RMB</kbd> + <kbd>LShift</kbd> + <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>E</kbd> <kbd>Q</kbd> | Moves the camera on the `x` (left/right), `y` (top/bottom) axes, and `z` (front/back) axes |
