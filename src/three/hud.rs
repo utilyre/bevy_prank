@@ -18,6 +18,7 @@ impl Plugin for Prank3dHudPlugin {
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
                 sync_position,
                 sync_fps,
+                sync_fov,
                 sync_speed_factor,
             ),
         );
@@ -32,6 +33,9 @@ struct HudPosition;
 
 #[derive(Component)]
 struct HudFps;
+
+#[derive(Component)]
+struct HudFov;
 
 #[derive(Component)]
 struct HudSpeedFactor;
@@ -70,6 +74,12 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dH
             parent.spawn((
                 Name::new("HudFps"),
                 HudFps,
+                TextBundle::from_section("", config.text_style.clone()),
+            ));
+
+            parent.spawn((
+                Name::new("HudFov"),
+                HudFov,
                 TextBundle::from_section("", config.text_style.clone()),
             ));
 
@@ -120,6 +130,27 @@ fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, diagnostics: Res<Diagno
     };
 
     text.sections[0].value = format!("fps: {:.0}", fps);
+}
+
+fn sync_fov(
+    mut hud_fov: Query<&mut Text, With<HudFov>>,
+    active: Res<Prank3dActive>,
+    pranks: Query<&Projection, With<Prank3d>>,
+) {
+    let Ok(mut text) = hud_fov.get_single_mut() else {
+        return;
+    };
+    let Some(entity) = active.0 else {
+        return;
+    };
+    let Ok(projection) = pranks.get(entity) else {
+        return;
+    };
+
+    text.sections[0].value = match projection {
+        Projection::Perspective(projection) => format!("fov: {:.0}", projection.fov.to_degrees()),
+        Projection::Orthographic(projection) => format!("scale: {:.2}", projection.scale),
+    };
 }
 
 fn sync_speed_factor(
