@@ -45,6 +45,9 @@ struct Prank3dActive(Option<Entity>);
 
 /// Adds debug functionality to [`Camera3dBundle`].
 ///
+/// Once [`Prank3d`] is attached to an entity, its `rotation` field of [`Transform`] should not be
+/// mutated manually.
+///
 /// # Example
 ///
 /// ```
@@ -72,6 +75,7 @@ pub struct Prank3d {
     /// The rate that the camera approaches its position.
     ///
     /// Values closer to zero make the approaching faster.
+    /// Zero disables interpolation.
     ///
     /// # Panic
     ///
@@ -83,7 +87,8 @@ pub struct Prank3d {
 
     /// The current position that the camera approaches towards.
     ///
-    /// This should be used instead of [`Transform`]'s `translation` field.
+    /// This should be used instead of [`Transform`]'s `translation` field, with the exception of
+    /// initializing the [`Transform`] component.
     pub position: Vec3,
 
     /// The current pitch of the camera in radians.
