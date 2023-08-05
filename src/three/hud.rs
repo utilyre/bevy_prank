@@ -7,6 +7,26 @@ use bevy::{
     prelude::*,
 };
 
+pub(super) struct Prank3dHudPlugin;
+
+impl Plugin for Prank3dHudPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            (
+                spawn
+                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
+                despawn
+                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
+                sync_position,
+                sync_fps,
+                sync_fov,
+                sync_speed,
+            ),
+        );
+    }
+}
+
 /// Camera HUD overlay configuration.
 #[derive(Clone)]
 pub struct Prank3dHudConfig {
@@ -31,26 +51,6 @@ impl Default for Prank3dHudConfig {
                 ..default()
             },
         }
-    }
-}
-
-pub(super) struct Prank3dHudPlugin;
-
-impl Plugin for Prank3dHudPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (
-                spawn
-                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
-                despawn
-                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
-                sync_position,
-                sync_fps,
-                sync_fov,
-                sync_speed,
-            ),
-        );
     }
 }
 

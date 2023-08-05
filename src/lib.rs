@@ -8,6 +8,34 @@ use bevy::prelude::*;
 pub mod prelude;
 pub mod three;
 
+/// Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
+///
+/// # Example
+///
+/// Add [`PrankPlugin`] to your app.
+///
+/// ```
+/// # use bevy::{prelude::*, diagnostic::FrameTimeDiagnosticsPlugin};
+/// # use bevy_prank::prelude::*;
+/// #
+/// let mut app = App::new();
+///
+/// app.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin));
+/// app.add_plugins(PrankPlugin::default());
+///
+/// app.run();
+/// ```
+#[derive(Default)]
+pub struct PrankPlugin(pub PrankConfig);
+
+impl Plugin for PrankPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(self.0.clone());
+
+        app.add_plugins(Prank3dPlugin);
+    }
+}
+
 /// Configuration of [`PrankPlugin`].
 ///
 /// # Example
@@ -39,33 +67,5 @@ impl Default for PrankConfig {
         Self {
             hud: Some(Prank3dHudConfig::default()),
         }
-    }
-}
-
-/// Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
-///
-/// # Example
-///
-/// Add [`PrankPlugin`] to your app.
-///
-/// ```
-/// # use bevy::{prelude::*, diagnostic::FrameTimeDiagnosticsPlugin};
-/// # use bevy_prank::prelude::*;
-/// #
-/// let mut app = App::new();
-///
-/// app.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin));
-/// app.add_plugins(PrankPlugin::default());
-///
-/// app.run();
-/// ```
-#[derive(Default)]
-pub struct PrankPlugin(pub PrankConfig);
-
-impl Plugin for PrankPlugin {
-    fn build(&self, app: &mut App) {
-        app.insert_resource(self.0.clone());
-
-        app.add_plugins(Prank3dPlugin);
     }
 }
