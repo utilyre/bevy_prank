@@ -90,6 +90,10 @@ fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResM
 
 fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
     for (mut prank, transform) in pranks.iter_mut() {
+        if !(0.0..1.0).contains(&prank.interp_rate) {
+            panic!("`interp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)");
+        }
+
         let (yaw, pitch, _) = transform
             .compute_transform()
             .rotation
