@@ -16,7 +16,7 @@ impl Plugin for Prank3dHudPlugin {
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
                 despawn
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
-                sync_translation,
+                sync_position,
                 sync_fps,
                 sync_speed_factor,
             ),
@@ -28,7 +28,7 @@ impl Plugin for Prank3dHudPlugin {
 struct Hud;
 
 #[derive(Component)]
-struct HudTranslation;
+struct HudPosition;
 
 #[derive(Component)]
 struct HudFps;
@@ -62,8 +62,8 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dH
         ))
         .with_children(|parent| {
             parent.spawn((
-                Name::new("HudTranslation"),
-                HudTranslation,
+                Name::new("HudPosition"),
+                HudPosition,
                 TextBundle::from_section("", config.text_style.clone()),
             ));
 
@@ -89,22 +89,22 @@ fn despawn(mut commands: Commands, hud: Query<Entity, With<Hud>>) {
     commands.entity(entity).despawn_recursive();
 }
 
-fn sync_translation(
-    mut hud_translation: Query<&mut Text, With<HudTranslation>>,
+fn sync_position(
+    mut hud_position: Query<&mut Text, With<HudPosition>>,
     active: Res<Prank3dActive>,
-    pranks: Query<&GlobalTransform, With<Prank3d>>,
+    pranks: Query<&Prank3d>,
 ) {
-    let Ok(mut text) = hud_translation.get_single_mut() else {
+    let Ok(mut text) = hud_position.get_single_mut() else {
         return;
     };
     let Some(entity) = active.0 else {
         return;
     };
-    let Ok(transform) = pranks.get(entity) else {
+    let Ok(prank) = pranks.get(entity) else {
         return;
     };
 
-    let Vec3 { x, y, z } = transform.translation();
+    let Vec3 { x, y, z } = prank.position;
     text.sections[0].value = format!("position: [{:.2}, {:.2}, {:.2}]", x, y, z);
 }
 
