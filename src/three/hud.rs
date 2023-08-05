@@ -55,7 +55,7 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dH
                     position_type: PositionType::Absolute,
                     bottom: Val::Px(0.0),
                     width: Val::Vw(100.0),
-                    height: Val::Px(25.0),
+                    height: config.height,
                     padding: UiRect::all(Val::Px(2.0)),
                     column_gap: Val::Px(20.0),
                     align_items: AlignItems::Center,

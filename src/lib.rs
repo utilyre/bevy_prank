@@ -26,6 +26,7 @@ impl Plugin for PrankPlugin {
 
 #[derive(Clone, Resource)]
 pub struct Prank3dHudConfig {
+    pub height: Val,
     pub background_color: BackgroundColor,
     pub text_style: TextStyle,
 }
@@ -33,6 +34,7 @@ pub struct Prank3dHudConfig {
 impl Default for Prank3dHudConfig {
     fn default() -> Self {
         Self {
+            height: Val::Px(25.0),
             background_color: Color::BLACK.with_a(0.9).into(),
             text_style: TextStyle {
                 font_size: 14.0,
