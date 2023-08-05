@@ -1,1 +1,4 @@
-pub use crate::{three::Prank3d, Prank3dHudConfig, PrankPlugin};
+pub use crate::{
+    three::{hud::Prank3dHudConfig, Prank3d},
+    PrankConfig, PrankPlugin,
+};

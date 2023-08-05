@@ -1,9 +1,30 @@
 use super::{Prank3d, Prank3dActive};
-use crate::Prank3dHudConfig;
+use crate::PrankConfig;
 use bevy::{
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     prelude::*,
 };
+
+#[derive(Clone)]
+pub struct Prank3dHudConfig {
+    pub height: Val,
+    pub background_color: BackgroundColor,
+    pub text_style: TextStyle,
+}
+
+impl Default for Prank3dHudConfig {
+    fn default() -> Self {
+        Self {
+            height: Val::Px(25.0),
+            background_color: Color::BLACK.with_a(0.9).into(),
+            text_style: TextStyle {
+                font_size: 14.0,
+                color: Color::WHITE,
+                ..default()
+            },
+        }
+    }
+}
 
 pub(super) struct Prank3dHudPlugin;
 
@@ -40,10 +61,13 @@ struct HudFov;
 #[derive(Component)]
 struct HudSpeed;
 
-fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<Prank3dHudConfig>) {
+fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<PrankConfig>) {
     if !hud.is_empty() {
         return;
     }
+    let Some(config) = config.hud.clone() else {
+        return;
+    };
 
     commands
         .spawn((

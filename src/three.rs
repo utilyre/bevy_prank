@@ -2,28 +2,21 @@ use self::{
     hud::Prank3dHudPlugin,
     input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation},
 };
-use crate::Prank3dHudConfig;
 use bevy::{
     prelude::*,
     window::{Cursor, CursorGrabMode, PrimaryWindow},
 };
 use std::f32::consts;
 
-mod hud;
+pub mod hud;
 mod input;
 
-pub(super) struct Prank3dPlugin {
-    pub(super) hud: Option<Prank3dHudConfig>,
-}
+pub(super) struct Prank3dPlugin;
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Prank3dInputPlugin);
-
-        if let Some(config) = self.hud.clone() {
-            app.insert_resource(config);
-            app.add_plugins(Prank3dHudPlugin);
-        }
+        app.add_plugins(Prank3dHudPlugin);
 
         app.init_resource::<Prank3dActive>();
         app.register_type::<Prank3d>();
@@ -91,7 +84,9 @@ fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResM
 fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
     for (mut prank, transform) in pranks.iter_mut() {
         if !(0.0..1.0).contains(&prank.interp_rate) {
-            panic!("`interp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)");
+            panic!(
+                "`interp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)"
+            );
         }
 
         let (yaw, pitch, _) = transform
