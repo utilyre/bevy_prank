@@ -29,7 +29,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
         app.add_plugins((
             DefaultPlugins,
-            // required unless `hud` field of PrankPlugin is set to `None`
+            // required unless `hud` field of `PrankConfig` is set to `None`
             FrameTimeDiagnosticsPlugin,
         ));
         app.add_plugins(PrankPlugin::default());
