@@ -15,10 +15,10 @@ impl Plugin for Prank3dInputPlugin {
         app.add_systems(
             PreUpdate,
             (
-                mode_input,
-                speed_factor_input.run_if(in_state(Prank3dMode::Fly)),
-                movement_input.run_if(not(in_state(Prank3dMode::None))),
-                rotation_input.run_if(in_state(Prank3dMode::Fly)),
+                mode,
+                speed_factor.run_if(in_state(Prank3dMode::Fly)),
+                movement.run_if(not(in_state(Prank3dMode::None))),
+                rotation.run_if(in_state(Prank3dMode::Fly)),
             )
                 .after(sync_active),
         );
@@ -39,7 +39,7 @@ pub(super) struct Prank3dMovement(pub(super) Vec3);
 #[derive(Event)]
 pub(super) struct Prank3dRotation(pub(super) Vec2);
 
-fn mode_input(
+fn mode(
     active: Res<Prank3dActive>,
     prev_mode: Res<State<Prank3dMode>>,
     mut mode: ResMut<NextState<Prank3dMode>>,
@@ -71,7 +71,7 @@ fn mode_input(
     }
 }
 
-fn speed_factor_input(
+fn speed_factor(
     active: Res<Prank3dActive>,
     mut pranks: Query<&mut Prank3d>,
     mut wheel: EventReader<MouseWheel>,
@@ -85,7 +85,7 @@ fn speed_factor_input(
         (prank.speed_factor + 0.1 * wheel.iter().fold(0.0, |acc, x| acc + x.y)).clamp(0.1, 10.0);
 }
 
-fn movement_input(
+fn movement(
     mode: Res<State<Prank3dMode>>,
     active: Res<Prank3dActive>,
     pranks: Query<(&GlobalTransform, &Prank3d)>,
@@ -142,7 +142,7 @@ fn movement_input(
     }));
 }
 
-fn rotation_input(
+fn rotation(
     mode: Res<State<Prank3dMode>>,
     mut rotation: EventWriter<Prank3dRotation>,
     mut motion: EventReader<MouseMotion>,
