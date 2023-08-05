@@ -32,13 +32,13 @@ impl Plugin for Prank3dPlugin {
         app.add_systems(
             Update,
             (
-                initialize_orientation,
+                initialize,
                 sync_cursor.run_if(
                     |active: Res<Prank3dActive>, mode: Res<State<Prank3dMode>>| {
                         active.is_changed() || mode.is_changed()
                     },
                 ),
-                movement.run_if(not(in_state(Prank3dMode::None))),
+                movement,
                 rotation.run_if(in_state(Prank3dMode::Fly)),
             ),
         );
@@ -53,7 +53,10 @@ struct Prank3dActive(Option<Entity>);
 pub struct Prank3d {
     pub speed: f32,
     pub speed_factor: f32,
+    pub interp_rate: f32,
     pub sensitivity: Vec2,
+
+    pub position: Vec3,
     pub pitch: f32,
     pub yaw: f32,
 }
@@ -63,7 +66,10 @@ impl Default for Prank3d {
         Self {
             speed: 10.0,
             speed_factor: 1.0,
+            interp_rate: 0.01,
             sensitivity: Vec2::splat(0.08),
+
+            position: Vec3::ZERO,
             pitch: 0.0,
             yaw: 0.0,
         }
@@ -82,13 +88,14 @@ fn sync_active(pranks: Query<(Entity, &Camera), With<Prank3d>>, mut active: ResM
     *active = Prank3dActive(new);
 }
 
-fn initialize_orientation(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
+fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
     for (mut prank, transform) in pranks.iter_mut() {
         let (yaw, pitch, _) = transform
             .compute_transform()
             .rotation
             .to_euler(EulerRot::YXZ);
 
+        prank.position = transform.translation();
         prank.pitch = pitch;
         prank.yaw = yaw;
     }
@@ -132,16 +139,22 @@ fn sync_cursor(
 fn movement(
     mut movement: EventReader<Prank3dMovement>,
     active: Res<Prank3dActive>,
-    mut pranks: Query<(&mut Transform, &Prank3d)>,
+    mut pranks: Query<(&mut Transform, &mut Prank3d)>,
     time: Res<Time>,
 ) {
     let movement = movement.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
     let Some(entity) = active.0 else {
         return;
     };
-    let (mut transform, prank) = pranks.get_mut(entity).expect("already checked");
+    let (mut transform, mut prank) = pranks.get_mut(entity).expect("already checked");
 
-    transform.translation += prank.speed * movement * time.delta_seconds();
+    let s = prank.speed;
+    prank.position += s * movement * time.delta_seconds();
+
+    transform.translation = transform.translation.lerp(
+        prank.position,
+        1.0 - prank.interp_rate.powf(time.delta_seconds()),
+    );
 }
 
 fn rotation(
