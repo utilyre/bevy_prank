@@ -147,7 +147,7 @@ fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, diagnostics: Res<Diagno
         return;
     };
     let Some(diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) else {
-        panic!("`bevy::diagnostic::FrameTimeDiagnosticsPlugin` not available");
+        panic!("`bevy::diagnostic::FrameTimeDiagnosticsPlugin` not added to the app");
     };
     let Some(fps) = diagnostic.smoothed() else {
         return;
