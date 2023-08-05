@@ -44,7 +44,7 @@ impl Default for Prank3dHudConfig {
     fn default() -> Self {
         Self {
             height: Val::Px(25.0),
-            background_color: Color::BLACK.with_a(0.9).into(),
+            background_color: Color::BLACK.with_a(0.5).into(),
             text_style: TextStyle {
                 font_size: 14.0,
                 color: Color::WHITE,
@@ -88,7 +88,7 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<PrankCon
                     bottom: Val::Px(0.0),
                     width: Val::Vw(100.0),
                     height: config.height,
-                    padding: UiRect::all(Val::Px(2.0)),
+                    padding: UiRect::horizontal(Val::Px(5.0)),
                     column_gap: Val::Px(20.0),
                     align_items: AlignItems::Center,
                     ..default()
@@ -147,7 +147,7 @@ fn sync_position(
     };
 
     let Vec3 { x, y, z } = prank.position;
-    text.sections[0].value = format!("position: [{:.2}, {:.2}, {:.2}]", x, y, z);
+    text.sections[0].value = format!("Position: [{:.2}, {:.2}, {:.2}]", x, y, z);
 }
 
 fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, diagnostics: Res<DiagnosticsStore>) {
@@ -161,7 +161,7 @@ fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, diagnostics: Res<Diagno
         return;
     };
 
-    text.sections[0].value = format!("fps: {:.0}", fps);
+    text.sections[0].value = format!("FPS: {:.0}", fps);
 }
 
 fn sync_fov(
@@ -180,8 +180,8 @@ fn sync_fov(
     };
 
     text.sections[0].value = match projection {
-        Projection::Perspective(projection) => format!("fov: {:.0}", projection.fov.to_degrees()),
-        Projection::Orthographic(projection) => format!("scale: {:.2}", projection.scale),
+        Projection::Perspective(projection) => format!("FOV: {:.0}", projection.fov.to_degrees()),
+        Projection::Orthographic(projection) => format!("SCALE: {:.2}", projection.scale),
     };
 }
 
@@ -200,5 +200,5 @@ fn sync_speed(
         return;
     };
 
-    text.sections[0].value = format!("speed: {:.1}", prank.speed_factor);
+    text.sections[0].value = format!("Speed: {:.1}", prank.speed_factor);
 }
