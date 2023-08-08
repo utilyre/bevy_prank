@@ -99,9 +99,9 @@ pub struct Prank3d {
 impl Default for Prank3d {
     fn default() -> Self {
         Self {
-            speed: 10.0,
+            speed: 50.0,
             speed_factor: 1.0,
-            interp_rate: 0.01,
+            interp_rate: 0.001,
             sensitivity: Vec2::splat(0.08),
             position: Vec3::ZERO,
             pitch: 0.0,
