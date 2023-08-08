@@ -110,16 +110,6 @@ impl Default for Prank3d {
     }
 }
 
-fn get_focused_window<'a>(
-    primary_window: Option<(Entity, &'_ Window)>,
-    mut windows: impl Iterator<Item = (Entity, &'a Window)>,
-) -> Option<Entity> {
-    windows
-        .find(|(_, window)| window.focused)
-        .map(|(entity, _)| entity)
-        .or_else(|| primary_window.and_then(|(entity, window)| window.focused.then_some(entity)))
-}
-
 fn sync_active(
     primary_window: Query<(Entity, &Window), With<PrimaryWindow>>,
     windows: Query<(Entity, &Window), Without<PrimaryWindow>>,
@@ -127,7 +117,12 @@ fn sync_active(
     mut active: ResMut<Prank3dActive>,
 ) {
     let primary_window = primary_window.get_single().ok();
-    let Some(focused_window) = get_focused_window(primary_window, windows.iter()) else {
+    let Some(focused_window) = windows
+        .iter()
+        .find(|(_, window)| window.focused)
+        .map(|(entity, _)| entity)
+        .or_else(|| primary_window.and_then(|(entity, window)| window.focused.then_some(entity)))
+    else {
         return;
     };
 
