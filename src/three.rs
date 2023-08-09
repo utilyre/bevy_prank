@@ -225,8 +225,9 @@ fn movement(
     };
     let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
 
+    let f = prank.speed_factor;
     let s = prank.speed;
-    prank.position += s * movement * time.delta_seconds();
+    prank.position += f * s * movement * time.delta_seconds();
 
     transform.translation = transform.translation.lerp(
         prank.position,

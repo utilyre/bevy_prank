@@ -123,7 +123,7 @@ fn movement(
                 movement += Vec3::NEG_Y;
             }
 
-            prank.speed_factor * movement.normalize_or_zero()
+            movement.normalize_or_zero()
         }
         Prank3dMode::Offset => {
             let motion = motion
