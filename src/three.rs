@@ -227,7 +227,7 @@ fn movement(
 
     let f = prank.speed_factor;
     let s = prank.speed;
-    prank.position += f * s * movement * time.delta_seconds();
+    prank.position += f.powi(2) * s * movement * time.delta_seconds();
 
     transform.translation = transform.translation.lerp(
         prank.position,
