@@ -15,7 +15,7 @@ impl Plugin for Prank3dHudPlugin {
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
                 despawn
                     .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
-                sync_position,
+                sync_translation,
                 sync_fps,
                 sync_fov,
                 sync_speed,
@@ -55,7 +55,7 @@ impl Default for Prank3dHudConfig {
 struct Hud;
 
 #[derive(Component)]
-struct HudPosition;
+struct HudTranslation;
 
 #[derive(Component)]
 struct HudFps;
@@ -95,8 +95,8 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<PrankCon
         ))
         .with_children(|parent| {
             parent.spawn((
-                Name::new("HudPosition"),
-                HudPosition,
+                Name::new("HudTranslation"),
+                HudTranslation,
                 TextBundle::from_section("", config.text_style.clone()),
             ));
 
@@ -128,12 +128,12 @@ fn despawn(mut commands: Commands, hud: Query<Entity, With<Hud>>) {
     commands.entity(entity).despawn_recursive();
 }
 
-fn sync_position(
-    mut hud_position: Query<&mut Text, With<HudPosition>>,
+fn sync_translation(
+    mut hud_translation: Query<&mut Text, With<HudTranslation>>,
     active: Res<Prank3dActive>,
     pranks: Query<&Prank3d>,
 ) {
-    let Ok(mut text) = hud_position.get_single_mut() else {
+    let Ok(mut text) = hud_translation.get_single_mut() else {
         return;
     };
     let Some(entity) = active.0 else {
@@ -143,8 +143,8 @@ fn sync_position(
         return;
     };
 
-    let Vec3 { x, y, z } = prank.position;
-    text.sections[0].value = format!("Position: [{:.2}, {:.2}, {:.2}]", x, y, z);
+    let Vec3 { x, y, z } = prank.translation;
+    text.sections[0].value = format!("Translation: [{:.2}, {:.2}, {:.2}]", x, y, z);
 }
 
 fn sync_fps(mut hud_fps: Query<&mut Text, With<HudFps>>, time: Res<Time>) {
@@ -191,5 +191,5 @@ fn sync_speed(
         return;
     };
 
-    text.sections[0].value = format!("Speed: {:.1}", prank.speed_factor);
+    text.sections[0].value = format!("Speed Scalar: {:.1}", prank.speed_scalar);
 }

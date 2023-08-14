@@ -10,7 +10,7 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
 ## ✨ Features
 
-- Provides smooth interpolation for movement without sacrificing camera position.
+- Provides smooth interpolation for movement without sacrificing camera's translation.
 
 - Includes an optional HUD overlay to display important information like FOV and FPS.
 

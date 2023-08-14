@@ -73,10 +73,10 @@ pub struct Prank3d {
     /// Constant speed that the camera moves at.
     pub speed: f32,
 
-    /// Factor of `speed` to adjust during gameplay with mouse scroll wheel.
-    pub speed_factor: f32,
+    /// Scalar of `speed` to adjust during gameplay with mouse scroll wheel.
+    pub speed_scalar: f32,
 
-    /// The rate that the camera approaches its position.
+    /// The rate that the camera approaches its translation.
     ///
     /// Values closer to zero make the approaching faster.
     /// Zero disables interpolation.
@@ -84,16 +84,16 @@ pub struct Prank3d {
     /// # Panic
     ///
     /// If its not in range `[0.0, 1.0)`.
-    pub interp_rate: f32,
+    pub lerp_rate: f32,
 
     /// Sensitivity of mouse motion.
     pub sensitivity: Vec2,
 
-    /// The current position that the camera approaches towards.
+    /// The current translation that the camera approaches towards.
     ///
     /// This should be used instead of [`Transform`]'s `translation` field, with the exception of
     /// initializing the [`Transform`] component.
-    pub position: Vec3,
+    pub translation: Vec3,
 
     /// The current pitch of the camera in radians.
     pub pitch: f32,
@@ -106,10 +106,10 @@ impl Default for Prank3d {
     fn default() -> Self {
         Self {
             speed: 25.0,
-            speed_factor: 1.0,
-            interp_rate: 0.001,
+            speed_scalar: 1.0,
+            lerp_rate: 0.001,
             sensitivity: Vec2::splat(0.08),
-            position: Vec3::ZERO,
+            translation: Vec3::ZERO,
             pitch: 0.0,
             yaw: 0.0,
         }
@@ -188,10 +188,8 @@ fn mode(
 
 fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
     for (mut prank, transform) in pranks.iter_mut() {
-        if !(0.0..1.0).contains(&prank.interp_rate) {
-            panic!(
-                "`interp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)"
-            );
+        if !(0.0..1.0).contains(&prank.lerp_rate) {
+            panic!("`lerp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)");
         }
 
         let (yaw, pitch, _) = transform
@@ -199,7 +197,7 @@ fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>
             .rotation
             .to_euler(EulerRot::YXZ);
 
-        prank.position = transform.translation();
+        prank.translation = transform.translation();
         prank.pitch = pitch;
         prank.yaw = yaw;
     }
@@ -262,8 +260,8 @@ fn interpolation(
     let (mut transform, prank) = pranks.get_mut(entity).expect("exists");
 
     transform.translation = transform.translation.lerp(
-        prank.position,
-        1.0 - prank.interp_rate.powf(time.delta_seconds()),
+        prank.translation,
+        1.0 - prank.lerp_rate.powf(time.delta_seconds()),
     );
 }
 
@@ -280,8 +278,8 @@ fn fly(
     };
     let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
 
-    prank.speed_factor =
-        (prank.speed_factor + 0.1 * wheel.iter().fold(0.0, |acc, w| acc + w.y)).clamp(0.1, 10.0);
+    prank.speed_scalar =
+        (prank.speed_scalar + 0.1 * wheel.iter().fold(0.0, |acc, w| acc + w.y)).clamp(0.1, 10.0);
 
     let mut movement = Vec3::ZERO;
     if keyboard.pressed(KeyCode::W) {
@@ -306,8 +304,8 @@ fn fly(
         movement += Vec3::NEG_Y;
     }
 
-    let speed = prank.speed_factor.powi(2) * prank.speed;
-    prank.position += speed * movement.normalize_or_zero() * time.delta_seconds();
+    let speed = prank.speed_scalar.powi(2) * prank.speed;
+    prank.translation += speed * movement.normalize_or_zero() * time.delta_seconds();
 
     let rotation = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
