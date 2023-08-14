@@ -11,3 +11,12 @@ keywords = ["bevy", "plugin", "camera"]
 
 [dependencies.bevy]
 version = "^0.11"
+default-features = false
+features = [
+    "bevy_core_pipeline",
+    "bevy_ui",
+    "default_font",
+]
+
+[dev-dependencies.bevy]
+version = "^0.11"
