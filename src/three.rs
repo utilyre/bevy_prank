@@ -1,10 +1,8 @@
 //! Provides three-dimensional camera functionality.
 
-use self::{
-    hud::Prank3dHudPlugin,
-    input::{Prank3dInputPlugin, Prank3dMode, Prank3dMovement, Prank3dRotation},
-};
+use self::hud::Prank3dHudPlugin;
 use bevy::{
+    input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
     render::camera::NormalizedRenderTarget,
     window::{CursorGrabMode, PrimaryWindow},
@@ -12,16 +10,16 @@ use bevy::{
 use std::f32::consts;
 
 pub mod hud;
-mod input;
 
 pub(super) struct Prank3dPlugin;
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((Prank3dInputPlugin, Prank3dHudPlugin))
+        app.add_plugins(Prank3dHudPlugin)
+            .add_state::<Prank3dMode>()
             .init_resource::<Prank3dActive>()
             .register_type::<Prank3d>()
-            .add_systems(PreUpdate, sync_active)
+            .add_systems(PreUpdate, (sync_active, mode.after(sync_active)))
             .add_systems(
                 Update,
                 (
@@ -31,11 +29,19 @@ impl Plugin for Prank3dPlugin {
                             active.is_changed() || mode.is_changed()
                         },
                     ),
-                    movement,
-                    rotation.run_if(in_state(Prank3dMode::Fly)),
+                    interpolation,
+                    fly.run_if(in_state(Prank3dMode::Fly)),
                 ),
             );
     }
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, States)]
+enum Prank3dMode {
+    Fly,
+    Offset,
+    #[default]
+    None,
 }
 
 #[derive(Default, Resource)]
@@ -148,6 +154,38 @@ fn sync_active(
     }
 }
 
+fn mode(
+    active: Res<Prank3dActive>,
+    prev_mode: Res<State<Prank3dMode>>,
+    mut mode: ResMut<NextState<Prank3dMode>>,
+    mouse: Res<Input<MouseButton>>,
+) {
+    if active.0.is_none() {
+        mode.set(Prank3dMode::None);
+        return;
+    }
+
+    match **prev_mode {
+        Prank3dMode::Fly => {
+            if !mouse.pressed(MouseButton::Right) {
+                mode.set(Prank3dMode::None);
+            }
+        }
+        Prank3dMode::Offset => {
+            if !mouse.pressed(MouseButton::Middle) {
+                mode.set(Prank3dMode::None);
+            }
+        }
+        Prank3dMode::None => {
+            if mouse.pressed(MouseButton::Right) {
+                mode.set(Prank3dMode::Fly);
+            } else if mouse.pressed(MouseButton::Middle) {
+                mode.set(Prank3dMode::Offset);
+            }
+        }
+    }
+}
+
 fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
     for (mut prank, transform) in pranks.iter_mut() {
         if !(0.0..1.0).contains(&prank.interp_rate) {
@@ -213,21 +251,15 @@ fn sync_cursor(
     }
 }
 
-fn movement(
-    mut movement: EventReader<Prank3dMovement>,
+fn interpolation(
     active: Res<Prank3dActive>,
-    mut pranks: Query<(&mut Transform, &mut Prank3d)>,
+    mut pranks: Query<(&mut Transform, &Prank3d)>,
     time: Res<Time>,
 ) {
-    let movement = movement.iter().fold(Vec3::ZERO, |acc, x| acc + x.0);
     let Some(entity) = active.0 else {
         return;
     };
-    let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
-
-    let f = prank.speed_factor;
-    let s = prank.speed;
-    prank.position += f.powi(2) * s * movement * time.delta_seconds();
+    let (mut transform, prank) = pranks.get_mut(entity).expect("exists");
 
     transform.translation = transform.translation.lerp(
         prank.position,
@@ -235,17 +267,49 @@ fn movement(
     );
 }
 
-fn rotation(
-    mut rotation: EventReader<Prank3dRotation>,
+fn fly(
     active: Res<Prank3dActive>,
     mut pranks: Query<(&mut Transform, &mut Prank3d)>,
     time: Res<Time>,
+    mut wheel: EventReader<MouseWheel>,
+    keyboard: Res<Input<KeyCode>>,
+    mut motion: EventReader<MouseMotion>,
 ) {
-    let rotation = rotation.iter().fold(Vec2::ZERO, |acc, x| acc + x.0);
     let Some(entity) = active.0 else {
         return;
     };
     let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
+
+    prank.speed_factor =
+        (prank.speed_factor + 0.1 * wheel.iter().fold(0.0, |acc, w| acc + w.y)).clamp(0.1, 10.0);
+
+    let mut movement = Vec3::ZERO;
+    if keyboard.pressed(KeyCode::W) {
+        movement += transform.forward();
+    }
+    if keyboard.pressed(KeyCode::A) {
+        movement += transform.left();
+    }
+    if keyboard.pressed(KeyCode::S) {
+        movement += transform.back();
+    }
+    if keyboard.pressed(KeyCode::D) {
+        movement += transform.right();
+    }
+    if keyboard.pressed(KeyCode::ShiftLeft) {
+        movement = Vec3::new(movement.x, 0.0, movement.z);
+    }
+    if keyboard.pressed(KeyCode::E) {
+        movement += Vec3::Y;
+    }
+    if keyboard.pressed(KeyCode::Q) {
+        movement += Vec3::NEG_Y;
+    }
+
+    let speed = prank.speed_factor.powi(2) * prank.speed;
+    prank.position += speed * movement.normalize_or_zero() * time.delta_seconds();
+
+    let rotation = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
     prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
         .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);
