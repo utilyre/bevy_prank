@@ -31,6 +31,7 @@ impl Plugin for Prank3dPlugin {
                     ),
                     interpolation,
                     fly.run_if(in_state(Prank3dMode::Fly)),
+                    offset.run_if(in_state(Prank3dMode::Offset)),
                 ),
             );
     }
@@ -314,4 +315,22 @@ fn fly(
     prank.yaw -= prank.sensitivity.x * rotation.x * time.delta_seconds();
 
     transform.rotation = Quat::from_euler(EulerRot::YXZ, prank.yaw, prank.pitch, 0.0);
+}
+
+fn offset(
+    active: Res<Prank3dActive>,
+    mut pranks: Query<(&mut Transform, &mut Prank3d)>,
+    time: Res<Time>,
+    mut motion: EventReader<MouseMotion>,
+) {
+    let Some(entity) = active.0 else {
+        return;
+    };
+    let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
+
+    let offset = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
+
+    let r = transform.rotation;
+    transform.translation += r * Vec3::new(offset.x, -offset.y, 0.0) * time.delta_seconds();
+    prank.translation = transform.translation;
 }
