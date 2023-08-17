@@ -70,7 +70,7 @@ fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<PrankCon
     if !hud.is_empty() {
         return;
     }
-    let Some(config) = config.hud.clone() else {
+    let Some(config) = config.hud3d.clone() else {
         return;
     };
 

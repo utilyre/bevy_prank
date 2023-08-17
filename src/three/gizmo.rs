@@ -63,7 +63,7 @@ fn camera(
     active: Res<Prank3dActive>,
     cameras: Query<(Entity, &GlobalTransform, Has<Prank3d>), With<Camera>>,
 ) {
-    let Some(config) = config.gizmo.clone() else {
+    let Some(config) = config.gizmo3d.clone() else {
         return;
     };
     let Some(prank_entity) = active.0 else {
@@ -96,7 +96,7 @@ fn point_light(
     config: Res<PrankConfig>,
     point_lights: Query<&GlobalTransform, With<PointLight>>,
 ) {
-    let Some(config) = config.gizmo.clone() else {
+    let Some(config) = config.gizmo3d.clone() else {
         return;
     };
 
@@ -116,7 +116,7 @@ fn spot_light(
     config: Res<PrankConfig>,
     spot_lights: Query<&GlobalTransform, With<SpotLight>>,
 ) {
-    let Some(config) = config.gizmo.clone() else {
+    let Some(config) = config.gizmo3d.clone() else {
         return;
     };
 

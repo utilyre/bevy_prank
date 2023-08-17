@@ -54,19 +54,19 @@ pub struct PrankConfig {
     /// Three-dimensional hint gizmo configuration.
     ///
     /// Set `None` to disable.
-    pub gizmo: Option<Prank3dGizmoConfig>,
+    pub gizmo3d: Option<Prank3dGizmoConfig>,
 
     /// Three-dimensional camera HUD overlay configuration.
     ///
     /// Set `None` to disable.
-    pub hud: Option<Prank3dHudConfig>,
+    pub hud3d: Option<Prank3dHudConfig>,
 }
 
 impl Default for PrankConfig {
     fn default() -> Self {
         Self {
-            hud: Some(Prank3dHudConfig::default()),
-            gizmo: Some(Prank3dGizmoConfig::default()),
+            gizmo3d: Some(Prank3dGizmoConfig::default()),
+            hud3d: Some(Prank3dHudConfig::default()),
         }
     }
 }
