@@ -95,12 +95,6 @@ pub struct Prank3d {
     /// This should be used instead of [`Transform`]'s `translation` field, with the exception of
     /// initializing the [`Transform`] component.
     pub translation: Vec3,
-
-    /// The current pitch of the camera in radians.
-    pub pitch: f32,
-
-    /// The current yaw of the camera in radians.
-    pub yaw: f32,
 }
 
 impl Default for Prank3d {
@@ -111,8 +105,6 @@ impl Default for Prank3d {
             lerp_rate: 0.001,
             sensitivity: Vec2::splat(0.08),
             translation: Vec3::ZERO,
-            pitch: 0.0,
-            yaw: 0.0,
         }
     }
 }
@@ -193,14 +185,7 @@ fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>
             panic!("`lerp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)");
         }
 
-        let (yaw, pitch, _) = transform
-            .compute_transform()
-            .rotation
-            .to_euler(EulerRot::YXZ);
-
         prank.translation = transform.translation();
-        prank.pitch = pitch;
-        prank.yaw = yaw;
     }
 }
 
@@ -310,11 +295,14 @@ fn fly(
 
     let rotation = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
-    prank.pitch = (prank.pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
-        .clamp(-consts::FRAC_PI_2, consts::FRAC_PI_2);
-    prank.yaw -= prank.sensitivity.x * rotation.x * time.delta_seconds();
-
-    transform.rotation = Quat::from_euler(EulerRot::YXZ, prank.yaw, prank.pitch, 0.0);
+    let (yaw, pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
+    transform.rotation = Quat::from_euler(
+        EulerRot::YXZ,
+        yaw - prank.sensitivity.x * rotation.x * time.delta_seconds(),
+        (pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
+            .clamp(-consts::FRAC_PI_3, consts::FRAC_PI_3),
+        0.0,
+    );
 }
 
 fn offset(
