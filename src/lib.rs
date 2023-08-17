@@ -51,14 +51,14 @@ impl Plugin for PrankPlugin {
 /// ```
 #[derive(Clone, Resource)]
 pub struct PrankConfig {
-    /// Hint gizmos configuration.
+    /// Three-dimensional hint gizmo configuration.
     ///
-    /// Set `None` to disable gizmo.
+    /// Set `None` to disable.
     pub gizmo: Option<Prank3dGizmoConfig>,
 
-    /// Camera HUD overlay configuration.
+    /// Three-dimensional camera HUD overlay configuration.
     ///
-    /// Set `None` to disable HUD.
+    /// Set `None` to disable.
     pub hud: Option<Prank3dHudConfig>,
 }
 

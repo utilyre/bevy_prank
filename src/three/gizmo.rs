@@ -1,4 +1,4 @@
-//! Hint gizmos.
+//! Provides three-dimensional hint gizmo.
 
 use super::{Prank3d, Prank3dActive};
 use crate::PrankConfig;
@@ -18,7 +18,7 @@ impl Plugin for Prank3dGizmoPlugin {
     }
 }
 
-/// Hint gizmos configuration.
+/// Three-dimensional hint gizmo configuration.
 #[derive(Clone)]
 pub struct Prank3dGizmoConfig {
     /// [`Camera`] spherical gizmo radius.

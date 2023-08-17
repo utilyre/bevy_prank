@@ -1,4 +1,4 @@
-//! Camera HUD overlay.
+//! Provides three-dimensional camera HUD overlay.
 
 use super::{Prank3d, Prank3dActive};
 use crate::PrankConfig;
@@ -24,7 +24,7 @@ impl Plugin for Prank3dHudPlugin {
     }
 }
 
-/// Camera HUD overlay configuration.
+/// Three-dimensional camera HUD overlay configuration.
 #[derive(Clone)]
 pub struct Prank3dHudConfig {
     /// Overlay height.
