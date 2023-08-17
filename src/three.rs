@@ -16,9 +16,9 @@ pub(super) struct Prank3dPlugin;
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Prank3dHudPlugin)
-            .add_state::<Prank3dMode>()
-            .init_resource::<Prank3dActive>()
             .register_type::<Prank3d>()
+            .init_resource::<Prank3dActive>()
+            .add_state::<Prank3dMode>()
             .add_systems(PreUpdate, (sync_active, mode.after(sync_active)))
             .add_systems(
                 Update,
