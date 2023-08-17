@@ -11,7 +11,7 @@ impl Plugin for Prank3dGizmoPlugin {
         app.add_systems(
             Update,
             (
-                camera3d,
+                camera,
                 (point_light, spot_light).run_if(|active: Res<Prank3dActive>| active.0.is_some()),
             ),
         );
@@ -21,10 +21,10 @@ impl Plugin for Prank3dGizmoPlugin {
 /// Hint gizmos configuration.
 #[derive(Clone)]
 pub struct Prank3dGizmoConfig {
-    /// [`Camera3d`] spherical gizmo radius.
+    /// [`Camera`] spherical gizmo radius.
     pub camera_radius: f32,
 
-    /// [`Camera3d`] gizmo color.
+    /// [`Camera`] gizmo color.
     pub camera_color: Color,
 
     /// [`Prank3d`]  gizmo color.
@@ -57,11 +57,11 @@ impl Default for Prank3dGizmoConfig {
     }
 }
 
-fn camera3d(
+fn camera(
     mut gizmos: Gizmos,
     config: Res<PrankConfig>,
     active: Res<Prank3dActive>,
-    cameras: Query<(Entity, &GlobalTransform, Has<Prank3d>), With<Camera3d>>,
+    cameras: Query<(Entity, &GlobalTransform, Has<Prank3d>), With<Camera>>,
 ) {
     let Some(config) = config.gizmo.clone() else {
         return;
