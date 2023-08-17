@@ -72,19 +72,19 @@ struct Prank3dActive(Option<Entity>);
 #[derive(Reflect, Component)]
 #[reflect(Component)]
 pub struct Prank3d {
-    /// Whether user inputs should be applied to this camera.
+    /// Whether user inputs should be applied to this [`Camera`].
     ///
-    /// If more than one camera with their `target` field set to the same window have this enabled,
-    /// only one of them will be picked.
+    /// If more than one [`Camera`] with their `target` field set to the same window have this
+    /// enabled, only one of them will be picked.
     pub is_active: bool,
 
-    /// Constant speed that the camera moves at.
+    /// Constant speed that the [`Camera`] moves at.
     pub speed: f32,
 
-    /// Scalar of `speed` to adjust during gameplay with mouse scroll wheel.
+    /// Scalar of `speed` field to adjust during gameplay with [`MouseWheel`].
     pub speed_scalar: f32,
 
-    /// The rate that the camera approaches its translation.
+    /// The rate that the [`Camera`] approaches its translation.
     ///
     /// Values closer to zero make the approaching faster.
     /// Zero disables interpolation.
@@ -94,7 +94,7 @@ pub struct Prank3d {
     /// If its not in range `[0.0, 1.0)`.
     pub lerp_rate: f32,
 
-    /// Sensitivity of mouse motion.
+    /// Sensitivity of [`MouseMotion`].
     pub sensitivity: Vec2,
 
     /// The current translation that the camera approaches towards.
