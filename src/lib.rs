@@ -1,8 +1,7 @@
 #![allow(clippy::type_complexity)]
 #![doc = include_str!("../README.md")]
 
-use self::three::hud::Prank3dHudConfig;
-use self::three::Prank3dPlugin;
+use self::three::{gizmo::Prank3dGizmoConfig, hud::Prank3dHudConfig, Prank3dPlugin};
 use bevy::prelude::*;
 
 pub mod prelude;
@@ -52,6 +51,11 @@ impl Plugin for PrankPlugin {
 /// ```
 #[derive(Clone, Resource)]
 pub struct PrankConfig {
+    /// Hint gizmos configuration.
+    ///
+    /// Set `None` to disable gizmo.
+    pub gizmo: Option<Prank3dGizmoConfig>,
+
     /// Camera HUD overlay configuration.
     ///
     /// Set `None` to disable HUD.
@@ -62,6 +66,7 @@ impl Default for PrankConfig {
     fn default() -> Self {
         Self {
             hud: Some(Prank3dHudConfig::default()),
+            gizmo: Some(Prank3dGizmoConfig::default()),
         }
     }
 }

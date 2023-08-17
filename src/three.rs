@@ -1,6 +1,6 @@
 //! Provides three-dimensional camera functionality.
 
-use self::hud::Prank3dHudPlugin;
+use self::{gizmo::Prank3dGizmoPlugin, hud::Prank3dHudPlugin};
 use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
@@ -9,13 +9,14 @@ use bevy::{
 };
 use std::f32::consts;
 
+pub mod gizmo;
 pub mod hud;
 
 pub(super) struct Prank3dPlugin;
 
 impl Plugin for Prank3dPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Prank3dHudPlugin)
+        app.add_plugins((Prank3dGizmoPlugin, Prank3dHudPlugin))
             .register_type::<Prank3d>()
             .init_resource::<Prank3dActive>()
             .add_state::<Prank3dMode>()
