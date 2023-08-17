@@ -71,6 +71,12 @@ struct Prank3dActive(Option<Entity>);
 #[derive(Reflect, Component)]
 #[reflect(Component)]
 pub struct Prank3d {
+    /// Whether user inputs should be applied to this camera.
+    ///
+    /// If more than one camera with their `target` field set to the same window have this enabled,
+    /// only one of them will be picked.
+    pub is_active: bool,
+
     /// Constant speed that the camera moves at.
     pub speed: f32,
 
@@ -100,6 +106,7 @@ pub struct Prank3d {
 impl Default for Prank3d {
     fn default() -> Self {
         Self {
+            is_active: true,
             speed: 25.0,
             speed_scalar: 1.0,
             lerp_rate: 0.001,
@@ -112,7 +119,7 @@ impl Default for Prank3d {
 fn sync_active(
     primary_window: Query<(Entity, &Window), With<PrimaryWindow>>,
     windows: Query<(Entity, &Window), Without<PrimaryWindow>>,
-    pranks: Query<(Entity, &Camera), With<Prank3d>>,
+    pranks: Query<(Entity, &Camera, &Prank3d)>,
     mut active: ResMut<Prank3dActive>,
 ) {
     let primary_window = primary_window.get_single().ok();
@@ -127,8 +134,8 @@ fn sync_active(
 
     let active_entity = pranks
         .iter()
-        .find(|(_, camera)| {
-            if !camera.is_active {
+        .find(|(_, camera, prank)| {
+            if !prank.is_active {
                 return false;
             }
             let Some(NormalizedRenderTarget::Window(winref)) = camera
@@ -140,7 +147,7 @@ fn sync_active(
 
             winref.entity() == focused_window
         })
-        .map(|(entity, _)| entity);
+        .map(|(entity, _, _)| entity);
 
     if active_entity != active.0 {
         *active = Prank3dActive(active_entity);

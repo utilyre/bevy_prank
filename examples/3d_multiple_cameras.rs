@@ -62,7 +62,10 @@ fn setup(
     commands.spawn((
         Name::new("FrontView"),
         FrontView,
-        Prank3d::default(),
+        Prank3d {
+            is_active: false,
+            ..default()
+        },
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 1.0, 0.0)
                 .looking_at(Vec3::new(0.0, 0.5, -8.0), Vec3::Y),
@@ -77,7 +80,10 @@ fn setup(
     commands.spawn((
         Name::new("TopView"),
         TopView,
-        Prank3d::default(),
+        Prank3d {
+            is_active: false,
+            ..default()
+        },
         Camera3dBundle {
             transform: Transform::from_xyz(0.0, 5.0, -8.0)
                 .looking_at(Vec3::new(0.0, 0.5, -8.0), Vec3::Y),
@@ -92,29 +98,42 @@ fn setup(
 
 fn camera_switch(
     mut game_camera: Query<&mut Camera, With<GameCamera>>,
-    mut front_view: Query<&mut Camera, (With<FrontView>, Without<GameCamera>)>,
-    mut top_view: Query<&mut Camera, (With<TopView>, Without<GameCamera>, Without<FrontView>)>,
+    mut front_view: Query<(&mut Camera, &mut Prank3d), (With<FrontView>, Without<GameCamera>)>,
+    mut top_view: Query<
+        (&mut Camera, &mut Prank3d),
+        (With<TopView>, Without<GameCamera>, Without<FrontView>),
+    >,
     keyboard: Res<Input<KeyCode>>,
 ) {
     let mut gc_camera = game_camera.single_mut();
-    let mut fv_camera = front_view.single_mut();
-    let mut tv_camera = top_view.single_mut();
+    let (mut fv_camera, mut fv_prank) = front_view.single_mut();
+    let (mut tv_camera, mut tv_prank) = top_view.single_mut();
 
-    // to switch cameras, just set its `is_active` property of `bevy::render::camera::Camera`
-    // make sure only one Camera with `Prank3d` component is active at a time
     if keyboard.just_pressed(KeyCode::Key1) {
         gc_camera.is_active = true;
+
         fv_camera.is_active = false;
+        fv_prank.is_active = false;
+
         tv_camera.is_active = false;
+        tv_prank.is_active = false;
     }
     if keyboard.just_pressed(KeyCode::Key2) {
         gc_camera.is_active = false;
+
         fv_camera.is_active = true;
+        fv_prank.is_active = true;
+
         tv_camera.is_active = false;
+        tv_prank.is_active = false;
     }
     if keyboard.just_pressed(KeyCode::Key3) {
         gc_camera.is_active = false;
+
         fv_camera.is_active = false;
+        fv_prank.is_active = false;
+
         tv_camera.is_active = true;
+        tv_prank.is_active = true;
     }
 }
