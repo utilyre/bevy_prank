@@ -8,21 +8,39 @@ pub(super) struct Prank3dGizmoPlugin;
 
 impl Plugin for Prank3dGizmoPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, cameras);
+        app.add_systems(
+            Update,
+            (
+                camera3d,
+                (point_light, spot_light).run_if(|active: Res<Prank3dActive>| active.0.is_some()),
+            ),
+        );
     }
 }
 
 /// Hint gizmos configuration.
 #[derive(Clone)]
 pub struct Prank3dGizmoConfig {
-    /// Camera spherical gizmo radius.
+    /// [`Camera3d`] spherical gizmo radius.
     pub camera_radius: f32,
 
-    /// Ordinary camera gizmo color.
+    /// [`Camera3d`] gizmo color.
     pub camera_color: Color,
 
-    /// Prank camera gizmo color.
+    /// [`Prank3d`]  gizmo color.
     pub prank_color: Color,
+
+    /// [`PointLight`] gizmo radius.
+    pub point_light_radius: f32,
+
+    /// [`PointLight`] gizmo color.
+    pub point_light_color: Color,
+
+    /// [`SpotLight`] gizmo radius.
+    pub spot_light_radius: f32,
+
+    /// [`SpotLight`] gizmo color.
+    pub spot_light_color: Color,
 }
 
 impl Default for Prank3dGizmoConfig {
@@ -31,11 +49,15 @@ impl Default for Prank3dGizmoConfig {
             camera_radius: 1.0,
             camera_color: Color::CYAN,
             prank_color: Color::PINK,
+            point_light_radius: 0.25,
+            point_light_color: Color::WHITE,
+            spot_light_radius: 0.25,
+            spot_light_color: Color::WHITE,
         }
     }
 }
 
-fn cameras(
+fn camera3d(
     mut gizmos: Gizmos,
     config: Res<PrankConfig>,
     active: Res<Prank3dActive>,
@@ -65,6 +87,51 @@ fn cameras(
             translation,
             config.camera_radius * camera_transform.forward(),
             color,
+        );
+    }
+}
+
+fn point_light(
+    mut gizmos: Gizmos,
+    config: Res<PrankConfig>,
+    point_lights: Query<&GlobalTransform, With<PointLight>>,
+) {
+    let Some(config) = config.gizmo.clone() else {
+        return;
+    };
+
+    for transform in point_lights.iter() {
+        let (_, rotation, translation) = transform.to_scale_rotation_translation();
+        gizmos.sphere(
+            translation,
+            rotation,
+            config.point_light_radius,
+            config.point_light_color,
+        );
+    }
+}
+
+fn spot_light(
+    mut gizmos: Gizmos,
+    config: Res<PrankConfig>,
+    spot_lights: Query<&GlobalTransform, With<SpotLight>>,
+) {
+    let Some(config) = config.gizmo.clone() else {
+        return;
+    };
+
+    for transform in spot_lights.iter() {
+        let (_, rotation, translation) = transform.to_scale_rotation_translation();
+        gizmos.sphere(
+            translation,
+            rotation,
+            config.spot_light_radius,
+            config.spot_light_color,
+        );
+        gizmos.ray(
+            translation,
+            config.spot_light_radius * transform.forward(),
+            config.spot_light_color,
         );
     }
 }
