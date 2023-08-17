@@ -255,18 +255,16 @@ fn fly(
     active: Res<Prank3dActive>,
     mut pranks: Query<(&mut Transform, &mut Prank3d)>,
     time: Res<Time>,
+    mut motion: EventReader<MouseMotion>,
     mut wheel: EventReader<MouseWheel>,
     keyboard: Res<Input<KeyCode>>,
-    mut motion: EventReader<MouseMotion>,
 ) {
     let Some(entity) = active.0 else {
         return;
     };
     let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
-
-    prank.speed_scalar =
-        (prank.speed_scalar + 0.1 * wheel.iter().fold(0.0, |acc, w| acc + w.y)).clamp(0.1, 10.0);
-
+    let motion = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
+    let wheel = wheel.iter().fold(0.0, |acc, w| acc + w.y);
     let mut movement = Vec3::ZERO;
     if keyboard.pressed(KeyCode::W) {
         movement += transform.forward();
@@ -290,16 +288,16 @@ fn fly(
         movement += Vec3::NEG_Y;
     }
 
+    prank.speed_scalar = (prank.speed_scalar + 0.1 * wheel).clamp(0.1, 10.0);
+
     let speed = prank.speed_scalar.powi(2) * prank.speed;
     prank.translation += speed * movement.normalize_or_zero() * time.delta_seconds();
-
-    let rotation = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
     let (yaw, pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
     transform.rotation = Quat::from_euler(
         EulerRot::YXZ,
-        yaw - prank.sensitivity.x * rotation.x * time.delta_seconds(),
-        (pitch - prank.sensitivity.y * rotation.y * time.delta_seconds())
+        yaw - prank.sensitivity.x * motion.x * time.delta_seconds(),
+        (pitch - prank.sensitivity.y * motion.y * time.delta_seconds())
             .clamp(-consts::FRAC_PI_3, consts::FRAC_PI_3),
         0.0,
     );
@@ -315,10 +313,9 @@ fn offset(
         return;
     };
     let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
-
-    let offset = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
+    let motion = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
     let r = transform.rotation;
-    transform.translation += r * Vec3::new(offset.x, -offset.y, 0.0) * time.delta_seconds();
+    transform.translation += r * Vec3::new(motion.x, -motion.y, 0.0) * time.delta_seconds();
     prank.translation = transform.translation;
 }
