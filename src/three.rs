@@ -186,13 +186,13 @@ fn mode(
     }
 }
 
-fn initialize(mut pranks: Query<(&mut Prank3d, &GlobalTransform), Added<Prank3d>>) {
+fn initialize(mut pranks: Query<(&mut Prank3d, &Transform), Added<Prank3d>>) {
     for (mut prank, transform) in pranks.iter_mut() {
         if !(0.0..1.0).contains(&prank.lerp_rate) {
             panic!("`lerp_rate` field of `bevy_prank::three::Prank3d` must be in range [0.0, 1.0)");
         }
 
-        prank.translation = transform.translation();
+        prank.translation = transform.translation;
     }
 }
 
