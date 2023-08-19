@@ -1,6 +1,6 @@
 //! Provides three-dimensional hint gizmo.
 
-use super::{Prank3d, Prank3dActive};
+use super::{any_active_prank, Prank3d, Prank3dActive};
 use crate::PrankConfig;
 use bevy::{ecs::query::Has, prelude::*};
 
@@ -52,10 +52,6 @@ impl Default for Prank3dGizmoConfig {
             spot_light_color: Color::WHITE,
         }
     }
-}
-
-fn any_active_prank(active: Res<Prank3dActive>) -> bool {
-    active.0.is_some()
 }
 
 fn camera(

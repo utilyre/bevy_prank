@@ -20,7 +20,14 @@ impl Plugin for Prank3dPlugin {
             .register_type::<Prank3d>()
             .init_resource::<Prank3dActive>()
             .add_state::<Prank3dMode>()
-            .add_systems(PreUpdate, (sync_active, mode.after(sync_active)))
+            .add_systems(
+                PreUpdate,
+                (
+                    sync_active,
+                    mode.run_if(resource_changed::<Prank3dActive>().or_else(any_active_prank))
+                        .after(sync_active),
+                ),
+            )
             .add_systems(
                 Update,
                 (
@@ -113,6 +120,10 @@ impl Default for Prank3d {
             translation: Vec3::ZERO,
         }
     }
+}
+
+fn any_active_prank(active: Res<Prank3dActive>) -> bool {
+    active.0.is_some()
 }
 
 fn sync_active(
