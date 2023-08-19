@@ -19,12 +19,12 @@ impl Plugin for Prank3dPlugin {
         app.add_plugins((Prank3dGizmoPlugin, Prank3dHudPlugin))
             .register_type::<Prank3d>()
             .init_resource::<Prank3dActive>()
-            .add_state::<Prank3dMode>()
+            .add_state::<Prank3dState>()
             .add_systems(
                 PreUpdate,
                 (
                     sync_active,
-                    mode.after(sync_active)
+                    sync_state.after(sync_active)
                         .run_if(resource_changed::<Prank3dActive>().or_else(any_active_prank)),
                 ),
             )
@@ -35,11 +35,11 @@ impl Plugin for Prank3dPlugin {
                     (
                         sync_cursor.run_if(
                             resource_changed::<Prank3dActive>()
-                                .or_else(state_changed::<Prank3dMode>()),
+                                .or_else(state_changed::<Prank3dState>()),
                         ),
                         interpolation,
-                        fly.run_if(in_state(Prank3dMode::Fly)),
-                        offset.run_if(in_state(Prank3dMode::Offset)),
+                        fly.run_if(in_state(Prank3dState::Fly)),
+                        offset.run_if(in_state(Prank3dState::Offset)),
                     )
                         .run_if(any_active_prank),
                 ),
@@ -48,7 +48,7 @@ impl Plugin for Prank3dPlugin {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, States)]
-enum Prank3dMode {
+enum Prank3dState {
     Fly,
     Offset,
     #[default]
@@ -168,33 +168,33 @@ fn sync_active(
     }
 }
 
-fn mode(
+fn sync_state(
     active: Res<Prank3dActive>,
-    prev_mode: Res<State<Prank3dMode>>,
-    mut mode: ResMut<NextState<Prank3dMode>>,
+    prev_state: Res<State<Prank3dState>>,
+    mut state: ResMut<NextState<Prank3dState>>,
     mouse: Res<Input<MouseButton>>,
 ) {
     if active.0.is_none() {
-        mode.set(Prank3dMode::None);
+        state.set(Prank3dState::None);
         return;
     }
 
-    match **prev_mode {
-        Prank3dMode::Fly => {
+    match **prev_state {
+        Prank3dState::Fly => {
             if !mouse.pressed(MouseButton::Right) {
-                mode.set(Prank3dMode::None);
+                state.set(Prank3dState::None);
             }
         }
-        Prank3dMode::Offset => {
+        Prank3dState::Offset => {
             if !mouse.pressed(MouseButton::Middle) {
-                mode.set(Prank3dMode::None);
+                state.set(Prank3dState::None);
             }
         }
-        Prank3dMode::None => {
+        Prank3dState::None => {
             if mouse.pressed(MouseButton::Right) {
-                mode.set(Prank3dMode::Fly);
+                state.set(Prank3dState::Fly);
             } else if mouse.pressed(MouseButton::Middle) {
-                mode.set(Prank3dMode::Offset);
+                state.set(Prank3dState::Offset);
             }
         }
     }
@@ -215,7 +215,7 @@ fn sync_cursor(
     mut windows: Query<&mut Window, Without<PrimaryWindow>>,
     active: Res<Prank3dActive>,
     pranks: Query<&Camera, With<Prank3d>>,
-    mode: Res<State<Prank3dMode>>,
+    state: Res<State<Prank3dState>>,
 ) {
     let camera = pranks.get(active.0.expect("is active")).expect("exists");
     let RenderTarget::Window(winref) = camera.target else {
@@ -228,16 +228,16 @@ fn sync_cursor(
         return;
     };
 
-    match **mode {
-        Prank3dMode::Fly => {
+    match **state {
+        Prank3dState::Fly => {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
         }
-        Prank3dMode::Offset => {
+        Prank3dState::Offset => {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
         }
-        Prank3dMode::None => {
+        Prank3dState::None => {
             window.cursor.visible = true;
             window.cursor.grab_mode = CursorGrabMode::None;
         }
