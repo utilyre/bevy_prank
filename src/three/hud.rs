@@ -11,10 +11,8 @@ impl Plugin for Prank3dHudPlugin {
         app.add_systems(
             Update,
             (
-                spawn
-                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_some()),
-                despawn
-                    .run_if(|active: Res<Prank3dActive>| active.is_changed() && active.0.is_none()),
+                spawn.run_if(just_activated),
+                despawn.run_if(just_inactivated),
                 sync_translation,
                 sync_fps,
                 sync_fov,
@@ -65,6 +63,14 @@ struct HudFov;
 
 #[derive(Component)]
 struct HudSpeed;
+
+fn just_activated(active: Res<Prank3dActive>) -> bool {
+    active.is_changed() && active.0.is_some()
+}
+
+fn just_inactivated(active: Res<Prank3dActive>) -> bool {
+    active.is_changed() && active.0.is_none()
+}
 
 fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<PrankConfig>) {
     if !hud.is_empty() {

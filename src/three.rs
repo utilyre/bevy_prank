@@ -26,9 +26,7 @@ impl Plugin for Prank3dPlugin {
                 (
                     initialize,
                     sync_cursor.run_if(
-                        |active: Res<Prank3dActive>, mode: Res<State<Prank3dMode>>| {
-                            active.is_changed() || mode.is_changed()
-                        },
+                        resource_changed::<Prank3dActive>().or_else(state_changed::<Prank3dMode>()),
                     ),
                     interpolation,
                     fly.run_if(in_state(Prank3dMode::Fly)),

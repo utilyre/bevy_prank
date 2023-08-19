@@ -10,10 +10,7 @@ impl Plugin for Prank3dGizmoPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (
-                camera,
-                (point_light, spot_light).run_if(|active: Res<Prank3dActive>| active.0.is_some()),
-            ),
+            (camera, point_light, spot_light).run_if(any_active_prank),
         );
     }
 }
@@ -55,6 +52,10 @@ impl Default for Prank3dGizmoConfig {
             spot_light_color: Color::WHITE,
         }
     }
+}
+
+fn any_active_prank(active: Res<Prank3dActive>) -> bool {
+    active.0.is_some()
 }
 
 fn camera(
