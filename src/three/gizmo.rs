@@ -65,12 +65,12 @@ fn camera(
     };
     let prank_entity = active.0.expect("is active");
 
-    for (camera_entity, camera_transform, has_prank) in cameras.iter() {
+    for (camera_entity, camera_transform, camera_has_prank) in cameras.iter() {
         if camera_entity == prank_entity {
             continue;
         }
 
-        let color = if has_prank {
+        let color = if camera_has_prank {
             config.prank_color
         } else {
             config.camera_color
