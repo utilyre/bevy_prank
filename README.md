@@ -6,8 +6,6 @@ Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
 </div>
 
-[demo.webm](https://github.com/utilyre/bevy_prank/assets/91974155/fd971418-b369-49ff-b959-2985c92e5d62)
-
 ## ✨ Features
 
 - Provides smooth interpolation for movement without sacrificing camera's translation.
