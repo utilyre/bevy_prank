@@ -4,6 +4,7 @@ use bevy::{
     render::camera::{NormalizedRenderTarget, RenderTarget},
     window::{CursorGrabMode, PrimaryWindow, WindowRef},
 };
+use std::ops::Deref;
 
 pub(super) struct Prank3dStatePlugin;
 
@@ -38,10 +39,18 @@ pub(super) enum Prank3dState {
 }
 
 #[derive(Default, Resource)]
-pub(super) struct Prank3dActive(pub(super) Option<Entity>);
+pub(super) struct Prank3dActive(Option<Entity>);
+
+impl Deref for Prank3dActive {
+    type Target = Option<Entity>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 pub(super) fn any_active(active: Res<Prank3dActive>) -> bool {
-    active.0.is_some()
+    active.is_some()
 }
 
 fn sync_active(
@@ -77,8 +86,8 @@ fn sync_active(
         })
         .map(|(entity, _, _)| entity);
 
-    if active_entity != active.0 {
-        *active = Prank3dActive(active_entity);
+    if active_entity != **active {
+        active.0 = active_entity;
     }
 }
 
@@ -88,7 +97,7 @@ fn sync_state(
     mut state: ResMut<NextState<Prank3dState>>,
     mouse: Res<Input<MouseButton>>,
 ) {
-    if active.0.is_none() {
+    if active.is_none() {
         state.set(Prank3dState::None);
         return;
     }
@@ -121,7 +130,7 @@ fn sync_cursor(
     pranks: Query<&Camera, With<Prank3d>>,
     state: Res<State<Prank3dState>>,
 ) {
-    let camera = pranks.get(active.0.expect("is active")).expect("exists");
+    let camera = pranks.get(active.expect("is active")).expect("exists");
     let RenderTarget::Window(winref) = camera.target else {
         return;
     };

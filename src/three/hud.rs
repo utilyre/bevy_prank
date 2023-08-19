@@ -62,11 +62,11 @@ struct HudFov;
 struct HudSpeed;
 
 fn just_activated(active: Res<Prank3dActive>) -> bool {
-    active.is_changed() && active.0.is_some()
+    active.is_changed() && active.is_some()
 }
 
 fn just_inactivated(active: Res<Prank3dActive>) -> bool {
-    active.is_changed() && active.0.is_none()
+    active.is_changed() && active.is_none()
 }
 
 fn spawn(mut commands: Commands, hud: Query<(), With<Hud>>, config: Res<PrankConfig>) {
@@ -139,7 +139,7 @@ fn sync_translation(
     let Ok(mut text) = hud_translation.get_single_mut() else {
         return;
     };
-    let prank = pranks.get(active.0.expect("is active")).expect("exists");
+    let prank = pranks.get(active.expect("is active")).expect("exists");
 
     let Vec3 { x, y, z } = prank.translation;
     text.sections[0].value = format!("Translation: [{:.2}, {:.2}, {:.2}]", x, y, z);
@@ -161,7 +161,7 @@ fn sync_fov(
     let Ok(mut text) = hud_fov.get_single_mut() else {
         return;
     };
-    let projection = pranks.get(active.0.expect("is active")).expect("exists");
+    let projection = pranks.get(active.expect("is active")).expect("exists");
 
     text.sections[0].value = match projection {
         Projection::Perspective(projection) => format!("FOV: {:.0}", projection.fov.to_degrees()),
@@ -177,7 +177,7 @@ fn sync_speed(
     let Ok(mut text) = hud_speed.get_single_mut() else {
         return;
     };
-    let prank = pranks.get(active.0.expect("is active")).expect("exists");
+    let prank = pranks.get(active.expect("is active")).expect("exists");
 
     text.sections[0].value = format!("Speed Scalar: {:.1}", prank.speed_scalar);
 }

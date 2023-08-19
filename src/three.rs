@@ -119,9 +119,7 @@ fn interpolation(
     mut pranks: Query<(&mut Transform, &Prank3d)>,
     time: Res<Time>,
 ) {
-    let (mut transform, prank) = pranks
-        .get_mut(active.0.expect("is active"))
-        .expect("exists");
+    let (mut transform, prank) = pranks.get_mut(active.expect("is active")).expect("exists");
 
     transform.translation = transform.translation.lerp(
         prank.translation,
@@ -137,9 +135,7 @@ fn fly(
     mut wheel: EventReader<MouseWheel>,
     keyboard: Res<Input<KeyCode>>,
 ) {
-    let (mut transform, mut prank) = pranks
-        .get_mut(active.0.expect("is active"))
-        .expect("exists");
+    let (mut transform, mut prank) = pranks.get_mut(active.expect("is active")).expect("exists");
     let motion = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
     let wheel = wheel.iter().fold(0.0, |acc, w| acc + w.y);
     let mut movement = Vec3::ZERO;
@@ -186,9 +182,7 @@ fn offset(
     time: Res<Time>,
     mut motion: EventReader<MouseMotion>,
 ) {
-    let (mut transform, mut prank) = pranks
-        .get_mut(active.0.expect("is active"))
-        .expect("exists");
+    let (mut transform, mut prank) = pranks.get_mut(active.expect("is active")).expect("exists");
     let motion = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
     let r = transform.rotation;

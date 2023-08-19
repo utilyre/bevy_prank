@@ -60,7 +60,7 @@ fn camera(
     let Some(config) = config.gizmo3d.clone() else {
         return;
     };
-    let prank_entity = active.0.expect("is active");
+    let prank_entity = active.expect("is active");
 
     for (camera_entity, camera_transform, camera_has_prank) in cameras.iter() {
         if camera_entity == prank_entity {
