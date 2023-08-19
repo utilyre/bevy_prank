@@ -27,6 +27,7 @@ pub struct PrankPlugin(pub PrankConfig);
 impl Plugin for PrankPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Prank3dPlugin)
+            .register_type::<PrankConfig>()
             .insert_resource(self.0.clone());
     }
 }
@@ -49,7 +50,8 @@ impl Plugin for PrankPlugin {
 ///     ))
 ///     .run();
 /// ```
-#[derive(Clone, Resource)]
+#[derive(Clone, Reflect, Resource)]
+#[reflect(Resource)]
 pub struct PrankConfig {
     /// Three-dimensional hint gizmo configuration.
     ///

@@ -16,7 +16,7 @@ impl Plugin for Prank3dGizmoPlugin {
 }
 
 /// Three-dimensional hint gizmo configuration.
-#[derive(Clone)]
+#[derive(Clone, Reflect)]
 pub struct Prank3dGizmoConfig {
     /// [`Camera`] spherical gizmo radius.
     pub camera_radius: f32,

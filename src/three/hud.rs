@@ -20,7 +20,7 @@ impl Plugin for Prank3dHudPlugin {
 }
 
 /// Three-dimensional camera HUD overlay configuration.
-#[derive(Clone)]
+#[derive(Clone, Reflect)]
 pub struct Prank3dHudConfig {
     /// Overlay height.
     pub height: Val,
