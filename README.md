@@ -1,6 +1,6 @@
 <div align="center">
 
-# [Bevy Prank](https://crates.io/crates/bevy_prank)
+# Bevy Prank
 
 Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
 
