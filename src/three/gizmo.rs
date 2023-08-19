@@ -1,6 +1,6 @@
 //! Provides three-dimensional hint gizmo.
 
-use super::{any_active_prank, Prank3d, Prank3dActive};
+use super::{any_active, Prank3d, Prank3dActive};
 use crate::PrankConfig;
 use bevy::{ecs::query::Has, prelude::*};
 
@@ -8,10 +8,7 @@ pub(super) struct Prank3dGizmoPlugin;
 
 impl Plugin for Prank3dGizmoPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (camera, point_light, spot_light).run_if(any_active_prank),
-        );
+        app.add_systems(Update, (camera, point_light, spot_light).run_if(any_active));
     }
 }
 

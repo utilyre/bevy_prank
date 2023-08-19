@@ -17,12 +17,12 @@ impl Plugin for Prank3dStatePlugin {
                     sync_active,
                     sync_state
                         .after(sync_active)
-                        .run_if(resource_changed::<Prank3dActive>().or_else(any_active_prank)),
+                        .run_if(resource_changed::<Prank3dActive>().or_else(any_active)),
                 ),
             )
             .add_systems(
                 Update,
-                sync_cursor.run_if(any_active_prank.and_then(
+                sync_cursor.run_if(any_active.and_then(
                     resource_changed::<Prank3dActive>().or_else(state_changed::<Prank3dState>()),
                 )),
             );
@@ -40,7 +40,7 @@ pub(super) enum Prank3dState {
 #[derive(Default, Resource)]
 pub(super) struct Prank3dActive(pub(super) Option<Entity>);
 
-pub(super) fn any_active_prank(active: Res<Prank3dActive>) -> bool {
+pub(super) fn any_active(active: Res<Prank3dActive>) -> bool {
     active.0.is_some()
 }
 

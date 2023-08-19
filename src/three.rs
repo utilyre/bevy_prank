@@ -3,7 +3,7 @@
 use self::{
     gizmo::Prank3dGizmoPlugin,
     hud::Prank3dHudPlugin,
-    state::{any_active_prank, Prank3dActive, Prank3dState, Prank3dStatePlugin},
+    state::{any_active, Prank3dActive, Prank3dState, Prank3dStatePlugin},
 };
 use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
@@ -30,7 +30,7 @@ impl Plugin for Prank3dPlugin {
                         fly.run_if(in_state(Prank3dState::Fly)),
                         offset.run_if(in_state(Prank3dState::Offset)),
                     )
-                        .run_if(any_active_prank),
+                        .run_if(any_active),
                 ),
             );
     }

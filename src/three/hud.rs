@@ -1,6 +1,6 @@
 //! Provides three-dimensional camera HUD overlay.
 
-use super::{any_active_prank, Prank3d, Prank3dActive};
+use super::{any_active, Prank3d, Prank3dActive};
 use crate::PrankConfig;
 use bevy::prelude::*;
 
@@ -13,7 +13,7 @@ impl Plugin for Prank3dHudPlugin {
             (
                 spawn.run_if(just_activated),
                 despawn.run_if(just_inactivated),
-                (sync_translation, sync_fps, sync_fov, sync_speed).run_if(any_active_prank),
+                (sync_translation, sync_fps, sync_fov, sync_speed).run_if(any_active),
             ),
         );
     }
