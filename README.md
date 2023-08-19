@@ -5,7 +5,7 @@
         <a href="https://crates.io/crates/bevy_prank"><img alt="version" src="https://img.shields.io/crates/v/bevy_prank" /></a>
         <a href="https://crates.io/crates/bevy_prank"><img alt="downloads" src="https://img.shields.io/crates/d/bevy_prank" /></a>
         <a href="https://github.com/utilyre/bevy_prank/issues"><img alt="issues" src="https://img.shields.io/github/issues/utilyre/bevy_prank" /></a>
-        <a href="https://github.com/utilyre/bevy_prank"><img alt="license" src="https://img.shields.io/github/license/utilyre/bevy_prank" /></a>
+        <a href="https://github.com/utilyre/bevy_prank/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/github/license/utilyre/bevy_prank" /></a>
     </h1>
     <p>
         Opinionated Unreal Engine inspired spectator camera for the Bevy game engine.
