@@ -4,8 +4,8 @@ use self::{gizmo::Prank3dGizmoPlugin, hud::Prank3dHudPlugin};
 use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
-    render::camera::NormalizedRenderTarget,
-    window::{CursorGrabMode, PrimaryWindow},
+    render::camera::{NormalizedRenderTarget, RenderTarget},
+    window::{CursorGrabMode, PrimaryWindow, WindowRef},
 };
 use std::f32::consts;
 
@@ -211,30 +211,21 @@ fn initialize(mut pranks: Query<(&mut Prank3d, &Transform), Added<Prank3d>>) {
 }
 
 fn sync_cursor(
-    mut primary_window: Query<(Entity, &mut Window), With<PrimaryWindow>>,
+    mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
     mut windows: Query<&mut Window, Without<PrimaryWindow>>,
     active: Res<Prank3dActive>,
     pranks: Query<&Camera, With<Prank3d>>,
     mode: Res<State<Prank3dMode>>,
 ) {
     let camera = pranks.get(active.0.expect("is active")).expect("exists");
-
-    let Some(NormalizedRenderTarget::Window(winref)) = camera
-        .target
-        .normalize(primary_window.get_single().ok().map(|(entity,_)| entity))
-    else {
+    let RenderTarget::Window(winref) = camera.target else {
         return;
     };
-
-    let mut window = match windows.get_mut(winref.entity()) {
-        Ok(window) => window,
-        Err(_) => {
-            let Ok((_, window)) = primary_window.get_single_mut() else {
-                return;
-            };
-
-            window
-        }
+    let Some(mut window) = (match winref {
+        WindowRef::Primary => primary_window.get_single_mut().ok(),
+        WindowRef::Entity(entity) => windows.get_mut(entity).ok(),
+    }) else {
+        return;
     };
 
     match **mode {
