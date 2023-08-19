@@ -24,20 +24,24 @@ impl Plugin for Prank3dPlugin {
                 PreUpdate,
                 (
                     sync_active,
-                    mode.run_if(resource_changed::<Prank3dActive>().or_else(any_active_prank))
-                        .after(sync_active),
+                    mode.after(sync_active)
+                        .run_if(resource_changed::<Prank3dActive>().or_else(any_active_prank)),
                 ),
             )
             .add_systems(
                 Update,
                 (
                     initialize,
-                    sync_cursor.run_if(any_active_prank.and_then(
-                        resource_changed::<Prank3dActive>().or_else(state_changed::<Prank3dMode>()),
-                    )),
-                    interpolation,
-                    fly.run_if(in_state(Prank3dMode::Fly)),
-                    offset.run_if(in_state(Prank3dMode::Offset)),
+                    (
+                        sync_cursor.run_if(
+                            resource_changed::<Prank3dActive>()
+                                .or_else(state_changed::<Prank3dMode>()),
+                        ),
+                        interpolation,
+                        fly.run_if(in_state(Prank3dMode::Fly)),
+                        offset.run_if(in_state(Prank3dMode::Offset)),
+                    )
+                        .run_if(any_active_prank),
                 ),
             );
     }
@@ -254,10 +258,9 @@ fn interpolation(
     mut pranks: Query<(&mut Transform, &Prank3d)>,
     time: Res<Time>,
 ) {
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let (mut transform, prank) = pranks.get_mut(entity).expect("exists");
+    let (mut transform, prank) = pranks
+        .get_mut(active.0.expect("is active"))
+        .expect("exists");
 
     transform.translation = transform.translation.lerp(
         prank.translation,
@@ -273,10 +276,9 @@ fn fly(
     mut wheel: EventReader<MouseWheel>,
     keyboard: Res<Input<KeyCode>>,
 ) {
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
+    let (mut transform, mut prank) = pranks
+        .get_mut(active.0.expect("is active"))
+        .expect("exists");
     let motion = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
     let wheel = wheel.iter().fold(0.0, |acc, w| acc + w.y);
     let mut movement = Vec3::ZERO;
@@ -323,10 +325,9 @@ fn offset(
     time: Res<Time>,
     mut motion: EventReader<MouseMotion>,
 ) {
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let (mut transform, mut prank) = pranks.get_mut(entity).expect("exists");
+    let (mut transform, mut prank) = pranks
+        .get_mut(active.0.expect("is active"))
+        .expect("exists");
     let motion = motion.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
 
     let r = transform.rotation;

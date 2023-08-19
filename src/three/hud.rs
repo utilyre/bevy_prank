@@ -1,6 +1,6 @@
 //! Provides three-dimensional camera HUD overlay.
 
-use super::{Prank3d, Prank3dActive};
+use super::{any_active_prank, Prank3d, Prank3dActive};
 use crate::PrankConfig;
 use bevy::prelude::*;
 
@@ -13,10 +13,7 @@ impl Plugin for Prank3dHudPlugin {
             (
                 spawn.run_if(just_activated),
                 despawn.run_if(just_inactivated),
-                sync_translation,
-                sync_fps,
-                sync_fov,
-                sync_speed,
+                (sync_translation, sync_fps, sync_fov, sync_speed).run_if(any_active_prank),
             ),
         );
     }
@@ -142,12 +139,7 @@ fn sync_translation(
     let Ok(mut text) = hud_translation.get_single_mut() else {
         return;
     };
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let Ok(prank) = pranks.get(entity) else {
-        return;
-    };
+    let prank = pranks.get(active.0.expect("is active")).expect("exists");
 
     let Vec3 { x, y, z } = prank.translation;
     text.sections[0].value = format!("Translation: [{:.2}, {:.2}, {:.2}]", x, y, z);
@@ -169,12 +161,7 @@ fn sync_fov(
     let Ok(mut text) = hud_fov.get_single_mut() else {
         return;
     };
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let Ok(projection) = pranks.get(entity) else {
-        return;
-    };
+    let projection = pranks.get(active.0.expect("is active")).expect("exists");
 
     text.sections[0].value = match projection {
         Projection::Perspective(projection) => format!("FOV: {:.0}", projection.fov.to_degrees()),
@@ -190,12 +177,7 @@ fn sync_speed(
     let Ok(mut text) = hud_speed.get_single_mut() else {
         return;
     };
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let Ok(prank) = pranks.get(entity) else {
-        return;
-    };
+    let prank = pranks.get(active.0.expect("is active")).expect("exists");
 
     text.sections[0].value = format!("Speed Scalar: {:.1}", prank.speed_scalar);
 }
