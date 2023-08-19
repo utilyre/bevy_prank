@@ -32,9 +32,9 @@ impl Plugin for Prank3dPlugin {
                 Update,
                 (
                     initialize,
-                    sync_cursor.run_if(
+                    sync_cursor.run_if(any_active_prank.and_then(
                         resource_changed::<Prank3dActive>().or_else(state_changed::<Prank3dMode>()),
-                    ),
+                    )),
                     interpolation,
                     fly.run_if(in_state(Prank3dMode::Fly)),
                     offset.run_if(in_state(Prank3dMode::Offset)),
@@ -213,10 +213,7 @@ fn sync_cursor(
     pranks: Query<&Camera, With<Prank3d>>,
     mode: Res<State<Prank3dMode>>,
 ) {
-    let Some(entity) = active.0 else {
-        return;
-    };
-    let camera = pranks.get(entity).expect("exists");
+    let camera = pranks.get(active.0.expect("is active")).expect("exists");
 
     let Some(NormalizedRenderTarget::Window(winref)) = camera
         .target
