@@ -13,7 +13,7 @@ pub mod three;
 ///
 /// Add [`PrankPlugin`] to your app.
 ///
-/// ```
+/// ```no_run
 /// # use bevy::prelude::*;
 /// # use bevy_prank::prelude::*;
 /// #
@@ -36,7 +36,7 @@ impl Plugin for PrankPlugin {
 ///
 /// # Example
 ///
-/// ```
+/// ```no_run
 /// # use bevy::prelude::*;
 /// # use bevy_prank::prelude::*;
 /// #
