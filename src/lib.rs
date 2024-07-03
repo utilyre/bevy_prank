@@ -44,7 +44,7 @@ impl Plugin for PrankPlugin {
 ///     .add_plugins((
 ///         DefaultPlugins,
 ///         PrankPlugin(PrankConfig {
-///             hud: None,
+///             hud3d: None,
 ///            ..default()
 ///         }),
 ///     ))
